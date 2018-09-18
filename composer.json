@@ -1,0 +1,20 @@
+{
+  "name": "wieni/wmbert",
+  "description": "A more user-friendly entity reference list field widget.",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Wieni",
+      "email": "info@wieni.be"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://packagist.drupal-composer.org"
+    }
+  ],
+  "minimum-stability": "alpha",
+  "prefer-stable": true,
+  "type": "drupal-module"
+}
