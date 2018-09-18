@@ -1,0 +1,5 @@
+name: Wieni Better Entity Reference Table
+type: module
+description: A more user-friendly entity reference list field widget.
+core: 8.x
+package: Fields
