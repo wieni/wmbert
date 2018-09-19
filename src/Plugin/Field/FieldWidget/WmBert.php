@@ -153,6 +153,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         $settings['add'] = 'select';
         $settings['add_placeholder'] = 'Select an entity';
         $settings['disable_duplicate_selection'] = true;
+        $settings['disable_parent_entity_selection'] = true;
         $settings['disable_remove'] = false;
         $settings['wrapper'] = true;
         return $settings;
@@ -205,6 +206,12 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         $form['disable_duplicate_selection'] = [
             '#default_value' => $this->getSetting('disable_duplicate_selection'),
             '#title' => $this->t('Disable duplicate selection'),
+            '#type' => 'checkbox',
+        ];
+
+        $form['disable_parent_entity_selection'] = [
+            '#default_value' => $this->getSetting('disable_parent_entity_selection'),
+            '#title' => $this->t('Disable selection of parent entity'),
             '#type' => 'checkbox',
         ];
 
@@ -284,6 +291,14 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             $entities = array_values(array_unique($entities));
         }
         $entities = array_filter($entities);
+
+        if ($triggering_element['#disable_parent_entity_selection'] ?? null) {
+            $key = array_search($triggering_element['#parent_entity_id'], $entities);
+
+            if ($key !== false && isset($entities[$key])) {
+                unset($entities[$key]);
+            }
+        }
 
         NestedArray::setValue($formState->getUserInput(), array_merge($parents, ['add']), null);
         NestedArray::setValue($formState->getStorage(), static::getStorageKey($fieldParents, $fieldName), $entities);
@@ -370,6 +385,10 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         // Add.
         $add = [];
 
+        if ($this->getSetting('disable_parent_entity_selection')) {
+            $entities[] = $entity;
+        }
+
         $entities = array_reduce($entities, function ($result, $entity) {
             /* @var \Drupal\Core\Entity\EntityInterface $entity */
             $result[$entity->id()] = $entity;
@@ -381,7 +400,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
                 $add = $this->getAddBySelect($entity, $button, $entities);
                 break;
             case static::ADD_SELECTION_AUTO_COMPLETE:
-                $add = $this->getAddByAutoComplete($button, $entities);
+                $add = $this->getAddByAutoComplete($entity, $button, $entities);
                 break;
             case static::ADD_SELECTION_RADIOS:
                 $add = $this->getAddByRadios($entity, $button, $entities);
@@ -489,30 +508,32 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         return [
             'entity' => [
                 '#ajax' => [
-                    'trigger_as' => [
-                        'name' => 'select_add_' . $button['#unique_base_id'],
-                    ],
-                ] + $button['#ajax'],
+                        'trigger_as' => [
+                            'name' => 'select_add_' . $button['#unique_base_id'],
+                        ],
+                    ] + $button['#ajax'],
                 '#options' => $options,
                 '#placeholder' => $this->getSetting('add_placeholder'),
                 '#type' => 'select',
             ],
             'select' => [
-                '#ajax' => [
-                    'event' => 'autocompleteclose',
-                ] + $button['#ajax'],
-                '#attributes' => [
-                    'class' => ['js-hide'],
-                ],
-                '#depth' => 1,
-                '#disable_duplicate_selection' => (bool) $this->getSetting('disable_duplicate_selection'),
-                '#name' => 'select_add_' . $button['#unique_base_id'],
-                '#value' => $this->t('add'),
-            ] + $button,
+                    '#ajax' => [
+                            'event' => 'autocompleteclose',
+                        ] + $button['#ajax'],
+                    '#attributes' => [
+                        'class' => ['js-hide'],
+                    ],
+                    '#depth' => 1,
+                    '#disable_duplicate_selection' => (bool) $this->getSetting('disable_duplicate_selection'),
+                    '#disable_parent_entity_selection' => (bool) $this->getSetting('disable_parent_entity_selection'),
+                    '#parent_entity_id' => $entity->id(),
+                    '#name' => 'select_add_' . $button['#unique_base_id'],
+                    '#value' => $this->t('add'),
+                ] + $button,
         ];
     }
 
-    protected function getAddByAutoComplete(array $button, array $entities): array
+    protected function getAddByAutoComplete(EntityInterface $entity, array $button, array $entities): array
     {
         $selectionSettings = $this->getFieldSetting('handler_settings') + ['match_operator' => 'CONTAINS'];
         if ($this->getSetting('disable_duplicate_selection')) {
@@ -537,17 +558,19 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
                 '#size' => $this->getSetting('size'),
             ],
             'auto_complete' => [
-                '#ajax' => [
-                    'event' => 'autocompleteclose',
-                ] + $button['#ajax'],
-                '#attributes' => [
-                    'class' => ['js-hide'],
-                ],
-                '#disable_duplicate_selection' => (bool) $this->getSetting('disable_duplicate_selection'),
-                '#depth' => 1,
-                '#name' => 'auto_complete_add_' . $button['#unique_base_id'],
-                '#value' => $this->t('add'),
-            ] + $button,
+                    '#ajax' => [
+                            'event' => 'autocompleteclose',
+                        ] + $button['#ajax'],
+                    '#attributes' => [
+                        'class' => ['js-hide'],
+                    ],
+                    '#disable_duplicate_selection' => (bool) $this->getSetting('disable_duplicate_selection'),
+                    '#disable_parent_entity_selection' => (bool) $this->getSetting('disable_parent_entity_selection'),
+                    '#parent_entity_id' => $entity->id(),
+                    '#depth' => 1,
+                    '#name' => 'auto_complete_add_' . $button['#unique_base_id'],
+                    '#value' => $this->t('add'),
+                ] + $button,
         ];
     }
 
