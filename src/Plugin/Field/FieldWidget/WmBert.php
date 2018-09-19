@@ -301,7 +301,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         return array_merge($fieldParents, ['#wmbert'], [$fieldName, 'entities']);
     }
 
-    public static function getNewEntity(FormStateInterface $formState, array $parents): int
+    public static function getNewEntity(FormStateInterface $formState, array $parents)
     {
         return NestedArray::getValue($formState->getUserInput(), array_merge($parents, ['add', 'entity']));
     }
