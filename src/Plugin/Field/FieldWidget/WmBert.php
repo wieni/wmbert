@@ -488,10 +488,10 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             ->getOptionsProvider($property_names[0], $entity)
             ->getSettableOptions($this->currentUser);
 
-        if (!empty($ignored)) {
-            $options = array_filter($options, function ($id) use ($entities) {
-                return !isset($ignored[$id]);
-            }, ARRAY_FILTER_USE_KEY);
+        foreach ($ignored as $id) {
+            if (isset($options[$id])) {
+                unset($options[$id]);
+            }
         }
 
         $options = ['_none' => '- ' . $this->t('None') . ' -'] + $options;
