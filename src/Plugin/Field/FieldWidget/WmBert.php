@@ -287,19 +287,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
                 break;
         }
 
-        if ($triggering_element['#disable_duplicate_selection'] ?? null) {
-            $entities = array_values(array_unique($entities));
-        }
-        $entities = array_filter($entities);
-
-        if ($triggering_element['#disable_parent_entity_selection'] ?? null) {
-            $key = array_search($triggering_element['#parent_entity_id'], $entities);
-
-            if ($key !== false && isset($entities[$key])) {
-                unset($entities[$key]);
-            }
-        }
-
         NestedArray::setValue($formState->getUserInput(), array_merge($parents, ['add']), null);
         NestedArray::setValue($formState->getStorage(), static::getStorageKey($fieldParents, $fieldName), $entities);
     }
@@ -382,12 +369,8 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
 
     protected function getAdd(array $entities, array $button, EntityInterface $entity): array
     {
-        // Add.
         $add = [];
-
-        if ($this->getSetting('disable_parent_entity_selection')) {
-            $entities[] = $entity;
-        }
+        $ignored = [];
 
         $entities = array_reduce($entities, function ($result, $entity) {
             /* @var \Drupal\Core\Entity\EntityInterface $entity */
@@ -395,21 +378,29 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             return $result;
         }, []);
 
+        if ($this->getSetting('disable_duplicate_selection')) {
+            $ignored = array_merge($ignored, array_keys($entities));
+        }
+
+        if ($this->getSetting('disable_parent_entity_selection')) {
+            $ignored = array_merge($ignored, [(int) $entity->id()]);
+        }
+
         switch ($this->getSetting('add')) {
             case static::ADD_SELECTION_SELECT:
-                $add = $this->getAddBySelect($entity, $button, $entities);
+                $add = $this->getAddBySelect($entity, $button, $entities, $ignored);
                 break;
             case static::ADD_SELECTION_AUTO_COMPLETE:
-                $add = $this->getAddByAutoComplete($entity, $button, $entities);
+                $add = $this->getAddByAutoComplete($entity, $button, $entities, $ignored);
                 break;
             case static::ADD_SELECTION_RADIOS:
-                $add = $this->getAddByRadios($entity, $button, $entities);
+                $add = $this->getAddByRadios($entity, $button, $entities, $ignored);
                 break;
         }
 
         return [
-            '#type' => 'container',
-        ] + $add;
+                '#type' => 'container',
+            ] + $add;
     }
 
     protected function getList(string $htmlId, array $entities, array $button): array
@@ -489,7 +480,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         return $list;
     }
 
-    protected function getAddBySelect(EntityInterface $entity, array $button, array $entities): array
+    protected function getAddBySelect(EntityInterface $entity, array $button, array $entities, array $ignored): array
     {
         $property_names = $this->fieldDefinition->getFieldStorageDefinition()->getPropertyNames();
         $options = $this->fieldDefinition
@@ -497,9 +488,9 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             ->getOptionsProvider($property_names[0], $entity)
             ->getSettableOptions($this->currentUser);
 
-        if ($this->getSetting('disable_duplicate_selection')) {
+        if (!empty($ignored)) {
             $options = array_filter($options, function ($id) use ($entities) {
-                return !isset($entities[$id]);
+                return !isset($ignored[$id]);
             }, ARRAY_FILTER_USE_KEY);
         }
 
@@ -524,8 +515,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
                         'class' => ['js-hide'],
                     ],
                     '#depth' => 1,
-                    '#disable_duplicate_selection' => (bool) $this->getSetting('disable_duplicate_selection'),
-                    '#disable_parent_entity_selection' => (bool) $this->getSetting('disable_parent_entity_selection'),
+                    '#ignored_entities' => $ignored,
                     '#parent_entity_id' => $entity->id(),
                     '#name' => 'select_add_' . $button['#unique_base_id'],
                     '#value' => $this->t('add'),
@@ -533,9 +523,13 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         ];
     }
 
-    protected function getAddByAutoComplete(EntityInterface $entity, array $button, array $entities): array
+    protected function getAddByAutoComplete(EntityInterface $entity, array $button, array $entities, array $ignored): array
     {
-        $selectionSettings = $this->getFieldSetting('handler_settings') + ['match_operator' => 'CONTAINS'];
+        $selectionSettings = $this->getFieldSetting('handler_settings') + [
+                'match_operator' => 'CONTAINS',
+                'ignored_entities' => $ignored,
+            ];
+
         if ($this->getSetting('disable_duplicate_selection')) {
             $selectionSettings['view']['arguments'][] = implode(',', array_keys($entities));
         }
@@ -564,8 +558,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
                     '#attributes' => [
                         'class' => ['js-hide'],
                     ],
-                    '#disable_duplicate_selection' => (bool) $this->getSetting('disable_duplicate_selection'),
-                    '#disable_parent_entity_selection' => (bool) $this->getSetting('disable_parent_entity_selection'),
+                    '#ignored_entities' => $ignored,
                     '#parent_entity_id' => $entity->id(),
                     '#depth' => 1,
                     '#name' => 'auto_complete_add_' . $button['#unique_base_id'],
@@ -574,9 +567,9 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         ];
     }
 
-    protected function getAddByRadios(EntityInterface $entity, array $button, array $entities): array
+    protected function getAddByRadios(EntityInterface $entity, array $button, array $entities, array $ignored): array
     {
-        $add = $this->getAddBySelect($entity, $button, $entities);
+        $add = $this->getAddBySelect($entity, $button, $entities, $ignored);
         unset($add['entity']['#options']['_none']);
         $add['entity']['#type'] = 'radios';
         return $add;
