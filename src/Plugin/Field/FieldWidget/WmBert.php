@@ -210,9 +210,11 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         ];
 
         $form['disable_parent_entity_selection'] = [
-            '#default_value' => $this->getSetting('disable_parent_entity_selection'),
+            '#default_value' => $this->getSetting('disable_parent_entity_selection')
+                && $this->referencesSameEntityType(),
             '#title' => $this->t('Disable selection of parent entity'),
             '#type' => 'checkbox',
+            '#disabled' => !$this->referencesSameEntityType(),
         ];
 
         $form['disable_remove'] = [
@@ -382,7 +384,10 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             $ignored = array_merge($ignored, array_keys($entities));
         }
 
-        if ($this->getSetting('disable_parent_entity_selection')) {
+        if (
+            $this->getSetting('disable_parent_entity_selection')
+            && $this->referencesSameEntityType()
+        ) {
             $ignored = array_merge($ignored, [(int) $entity->id()]);
         }
 
@@ -573,6 +578,12 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         unset($add['entity']['#options']['_none']);
         $add['entity']['#type'] = 'radios';
         return $add;
+    }
+
+    protected function referencesSameEntityType()
+    {
+        return $this->fieldDefinition->getTargetEntityTypeId()
+            === $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type');
     }
 
     private function getNewSelectionOptions(): array
