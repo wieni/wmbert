@@ -423,11 +423,14 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             '#type' => 'table',
         ];
 
-        $list['#tabledrag'] = [[
-            'action' => 'order',
-            'group' => 'wmbert-order-weight',
-            'relationship' => 'sibling',
-        ]];
+        if ($this->fieldDefinition->getFieldStorageDefinition()->isMultiple()) {
+            $list['#tabledrag'] = [[
+                'action' => 'order',
+                'group' => 'wmbert-order-weight',
+                'relationship' => 'sibling',
+            ]];
+        }
+
 
         if (!empty($entities) && !empty($listPlugin->getHeader())) {
             $list['#header'] = array_merge([''], $listPlugin->getHeader());
@@ -462,22 +465,24 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
 
             if (!$this->getSetting('disable_remove')) {
                 $row['remove'] = [
-                    '#depth' => 2,
-                    '#name' => 'remove_' . $ind . '_' . $button['#unique_base_id'],
-                    '#src' => 'core/misc/icons/000000/ex.svg',
-                    '#type' => 'image_button',
-                ] + $button;
+                        '#depth' => 2,
+                        '#name' => 'remove_' . $ind . '_' . $button['#unique_base_id'],
+                        '#src' => 'core/misc/icons/000000/ex.svg',
+                        '#type' => 'image_button',
+                    ] + $button;
             }
 
-            $weight = $ind;
-            $row['#weight'] = $weight;
-            $row['weight'] = [
-                '#attributes' => ['class' => ['wmbert-order-weight']],
-                '#default_value' => $weight,
-                '#title' => t('Weight for @title', ['@title' => $entity->label()]),
-                '#title_display' => 'invisible',
-                '#type' => 'weight',
-            ];
+            if ($this->fieldDefinition->getFieldStorageDefinition()->isMultiple()) {
+                $weight = $ind;
+                $row['#weight'] = $weight;
+                $row['weight'] = [
+                    '#attributes' => ['class' => ['wmbert-order-weight']],
+                    '#default_value' => $weight,
+                    '#title' => t('Weight for @title', ['@title' => $entity->label()]),
+                    '#title_display' => 'invisible',
+                    '#type' => 'weight',
+                ];
+            }
 
             $list[$ind] = $row;
         }
