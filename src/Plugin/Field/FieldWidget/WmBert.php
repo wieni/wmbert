@@ -7,6 +7,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
@@ -129,7 +130,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             return $element;
         }
 
-        $element['list'] = $this->getList($elementId, $entities, $button);
+        $element['list'] = $this->getList($elementId, $entities, $button, $items->getEntity());
 
         $cardinality = $this->fieldDefinition->getFieldStorageDefinition()->getCardinality();
         if ($cardinality > 0 && isset($entities[$cardinality - 1])) {
@@ -408,12 +409,14 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             ] + $add;
     }
 
-    protected function getList(string $htmlId, array $entities, array $button): array
+    protected function getList(string $htmlId, array $entities, array $button, FieldableEntityInterface $parent): array
     {
         $tableId = Html::getUniqueId($htmlId . '-table');
         $listPluginDefinition = $this->entityReferenceListFormatterManager->getDefinition($this->getSetting('list'));
         /* @var EntityReferenceListFormatterInterface $listPlugin */
-        $listPlugin = $this->entityReferenceListFormatterManager->createInstance($listPluginDefinition['id']);
+        $listPlugin = $this->entityReferenceListFormatterManager
+            ->createInstance($listPluginDefinition['id'])
+            ->setParentEntity($parent);
 
         $list = [
             '#attributes' => [
