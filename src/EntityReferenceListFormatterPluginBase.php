@@ -29,4 +29,15 @@ abstract class EntityReferenceListFormatterPluginBase extends PluginBase impleme
         $this->parentEntity = $parentEntity;
         return $this;
     }
+
+    protected function getTranslatedEntity(EntityInterface $entity)
+    {
+        $langcode = $this->getParentEntity()->language()->getId();
+
+        if ($entity instanceof TranslatableInterface && $entity->hasTranslation($langcode)) {
+            return $entity->getTranslation($langcode);
+        }
+
+        return $entity;
+    }
 }

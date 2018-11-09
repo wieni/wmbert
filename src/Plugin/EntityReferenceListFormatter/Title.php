@@ -18,6 +18,8 @@ class Title extends EntityReferenceListFormatterPluginBase
      */
     public function getCells(EntityInterface $entity): array
     {
+        $entity = $this->getTranslatedEntity($entity);
+        
         return [
             ['#markup' => $entity->label()],
         ];
