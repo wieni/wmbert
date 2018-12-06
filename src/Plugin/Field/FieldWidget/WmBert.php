@@ -363,9 +363,9 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         $entityType = $this->getFieldSetting('target_type');
         $storage = $this->entityTypeManager->getStorage($entityType);
 
-        $entities = array_values(array_map(function ($id) use ($storage) {
-            return $storage->load($id);
-        }, $entities));
+        $entities = array_values(array_filter(array_map(function ($id) use ($storage) {
+            return $id ? $storage->load($id) : null;
+        }, $entities)));
 
         return $entities;
     }
@@ -454,6 +454,11 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         }
 
         foreach ($entities as $ind => $entity) {
+
+            if (!$entity) {
+                continue;
+            }
+
             $row = [
                 '#attributes' => [
                     'class' => ['draggable'],
