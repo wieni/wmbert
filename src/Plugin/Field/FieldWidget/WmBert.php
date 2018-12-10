@@ -363,11 +363,13 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         $entityType = $this->getFieldSetting('target_type');
         $storage = $this->entityTypeManager->getStorage($entityType);
 
-        $entities = array_values(array_filter(array_map(function ($id) use ($storage) {
-            return $id ? $storage->load($id) : null;
-        }, $entities)));
+        $entities = array_filter($entities, 'is_null');
+        $entities = array_map(function ($id) use ($storage) {
+            return $storage->load($id);
+        }, $entities);
+        $entities = array_filter($entities);
 
-        return $entities;
+        return array_values($entities);
     }
 
     protected function getAdd(array $entities, array $button, EntityInterface $entity): array
