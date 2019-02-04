@@ -236,6 +236,27 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
     /**
      * {@inheritdoc}
      */
+    public function settingsSummary() {
+        $summary = [];
+
+        if ($value = $this->getSetting('list')) {
+            $summary[] = $this->t('List formatter: @value', ['@value' => $value]);
+        }
+
+        if ($value = $this->getSetting('add')) {
+            $summary[] = $this->t('Selection: @value', ['@value' => $value]);
+        }
+
+        if ($value = $this->getSetting('add_placeholder')) {
+            $summary[] = $this->t('Placeholder: @value', ['@value' => $value]);
+        }
+
+        return $summary;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function massageFormValues(array $values, array $form, FormStateInterface $form_state)
     {
         $ids = [];
