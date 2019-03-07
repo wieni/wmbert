@@ -247,7 +247,10 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             $summary[] = $this->t('Selection: @value', ['@value' => $value]);
         }
 
-        if ($value = $this->getSetting('add_placeholder')) {
+        if (
+            $this->getSetting('add') === self::ADD_SELECTION_AUTO_COMPLETE
+            && ($value = $this->getSetting('add_placeholder'))
+        ) {
             $summary[] = $this->t('Placeholder: @value', ['@value' => $value]);
         }
 
