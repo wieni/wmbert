@@ -3,9 +3,7 @@
 namespace Drupal\wmbert;
 
 use Drupal\Component\Plugin\PluginBase;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
-use Drupal\Core\Entity\TranslatableInterface;
 
 abstract class EntityReferenceListFormatterPluginBase extends PluginBase implements EntityReferenceListFormatterInterface
 {
@@ -28,16 +26,5 @@ abstract class EntityReferenceListFormatterPluginBase extends PluginBase impleme
     {
         $this->parentEntity = $parentEntity;
         return $this;
-    }
-
-    protected function getTranslatedEntity(EntityInterface $entity)
-    {
-        $langcode = $this->getParentEntity()->language()->getId();
-
-        if ($entity instanceof TranslatableInterface && $entity->hasTranslation($langcode)) {
-            return $entity->getTranslation($langcode);
-        }
-
-        return $entity;
     }
 }
