@@ -3,10 +3,8 @@
 namespace Drupal\wmbert\Plugin\EntityReferenceListFormatter;
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\wmbert\EntityReferenceListFormatterPluginBase;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * @EntityReferenceListFormatter(
@@ -16,19 +14,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class Title extends EntityReferenceListFormatterPluginBase implements ContainerFactoryPluginInterface
 {
-    /** @var EntityRepositoryInterface */
-    protected $entityRepository;
-
-    public function __construct(
-        array $configuration,
-        string $pluginId,
-        $pluginDefinition,
-        EntityRepositoryInterface $entityRepository
-    ) {
-        parent::__construct($configuration, $pluginId, $pluginDefinition);
-        $this->entityRepository = $entityRepository;
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -39,22 +24,5 @@ class Title extends EntityReferenceListFormatterPluginBase implements ContainerF
         return [
             ['#markup' => $entity->label()],
         ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function create(
-        ContainerInterface $container,
-        array $configuration,
-        $pluginId,
-        $pluginDefinition
-    ) {
-        return new static(
-            $configuration,
-            $pluginId,
-            $pluginDefinition,
-            $container->get('entity.repository')
-        );
     }
 }
