@@ -42,7 +42,19 @@ class WmBertSelection extends DefaultSelection
         return [
             'ignored_entities' => [],
             'same_language_only' => false,
+            'result_amount' => 0,
         ] + parent::defaultConfiguration();
+    }
+
+    public function getReferenceableEntities($match = null, $match_operator = 'CONTAINS', $limit = 0)
+    {
+        $configuration = $this->getConfiguration();
+
+        if (isset($configuration['result_amount'])) {
+            $limit = $configuration['result_amount'];
+        }
+
+        return parent::getReferenceableEntities($match, $match_operator, $limit);
     }
 
     protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS')
