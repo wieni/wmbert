@@ -5,12 +5,12 @@ namespace Drupal\wmbert;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
-use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class EntityReferenceListFormatterPluginBase extends PluginBase implements EntityReferenceListFormatterInterface
 {
-    /** @var FieldableEntityInterface */
+    /** @var ContentEntityInterface */
     protected $parentEntity;
     /** @var EntityRepositoryInterface */
     protected $entityRepository;
@@ -47,14 +47,14 @@ abstract class EntityReferenceListFormatterPluginBase extends PluginBase impleme
         return [];
     }
 
-    /** @return FieldableEntityInterface|null */
+    /** @return ContentEntityInterface|null */
     public function getParentEntity()
     {
         return $this->parentEntity;
     }
 
     /** @return $this */
-    public function setParentEntity(FieldableEntityInterface $parentEntity)
+    public function setParentEntity(ContentEntityInterface $parentEntity)
     {
         $this->parentEntity = $parentEntity;
         return $this;
