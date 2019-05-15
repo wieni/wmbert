@@ -2,3 +2,7 @@ services:
     plugin.manager.entity_reference_list_formatter:
         class: Drupal\wmbert\EntityReferenceListFormatterManager
         parent: default_plugin_manager
+
+    plugin.manager.entity_reference_label_formatter:
+        class: Drupal\wmbert\EntityReferenceLabelFormatterManager
+        parent: default_plugin_manager

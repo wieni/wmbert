@@ -2,12 +2,14 @@
 
 namespace Drupal\wmbert\Plugin\EntityReferenceSelection;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\wmbert\EntityReferenceLabelFormatterManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -23,6 +25,8 @@ class WmBertSelection extends DefaultSelection
 {
     /** @var LanguageManagerInterface */
     protected $languageManager;
+    /** @var EntityReferenceLabelFormatterManager */
+    protected $entityReferenceLabelFormatterManager;
 
     public function __construct(
         array $configuration,
@@ -31,10 +35,12 @@ class WmBertSelection extends DefaultSelection
         EntityManagerInterface $entityManager,
         ModuleHandlerInterface $moduleHandler,
         AccountInterface $currentUser,
-        LanguageManagerInterface $languageManager
+        LanguageManagerInterface $languageManager,
+        EntityReferenceLabelFormatterManager $entityReferenceLabelFormatterManager
     ) {
         parent::__construct($configuration, $pluginId, $pluginDefinition, $entityManager, $moduleHandler, $currentUser);
         $this->languageManager = $languageManager;
+        $this->entityReferenceLabelFormatterManager = $entityReferenceLabelFormatterManager;
     }
 
     public function defaultConfiguration()
@@ -42,6 +48,7 @@ class WmBertSelection extends DefaultSelection
         return [
             'ignored_entities' => [],
             'same_language_only' => false,
+            'label_formatter' => 'title',
             'result_amount' => 0,
         ] + parent::defaultConfiguration();
     }
@@ -54,7 +61,29 @@ class WmBertSelection extends DefaultSelection
             $limit = $configuration['result_amount'];
         }
 
-        return parent::getReferenceableEntities($match, $match_operator, $limit);
+        $target_type = $configuration['target_type'];
+
+        $query = $this->buildEntityQuery($match, $match_operator);
+        if ($limit > 0) {
+            $query->range(0, $limit);
+        }
+
+        $result = $query->execute();
+
+        if (empty($result)) {
+            return [];
+        }
+
+        $options = [];
+        $entities = $this->entityManager->getStorage($target_type)->loadMultiple($result);
+        $formatter = $this->entityReferenceLabelFormatterManager->createInstance($configuration['label_formatter']);
+
+        foreach ($entities as $entity_id => $entity) {
+            $bundle = $entity->bundle();
+            $options[$bundle][$entity_id] = Html::escape($formatter->getLabel($entity));
+        }
+
+        return $options;
     }
 
     protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS')
@@ -94,7 +123,8 @@ class WmBertSelection extends DefaultSelection
             $container->get('entity.manager'),
             $container->get('module_handler'),
             $container->get('current_user'),
-            $container->get('language_manager')
+            $container->get('language_manager'),
+            $container->get('plugin.manager.entity_reference_label_formatter')
         );
     }
 }
