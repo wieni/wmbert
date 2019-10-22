@@ -7,7 +7,7 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
@@ -93,10 +93,11 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         array $element,
         array &$form,
         FormStateInterface $formState
-    ) {
+    ): array {
         $id = 'wmbert';
         $elementId = Html::getUniqueId($id);
 
+        $element['#type'] = 'wmbert';
         $element['#attached'] = [
             'library' => ['wmbert/default'],
         ];
@@ -110,7 +111,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         }
 
         $fieldName = $this->fieldDefinition->getName();
-        $storageKey = $this->getStorageKey($element['#field_parents'], $fieldName);
+        $storageKey = self::getStorageKey($element['#field_parents'], $fieldName);
 
         $buttonBaseId = sha1(implode('-', array_merge($element['#field_parents'], [$fieldName])));
 
@@ -453,7 +454,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             ] + $add;
     }
 
-    protected function getList(string $htmlId, array $entities, array $button, ContentEntityInterface $parent): array
+    protected function getList(string $htmlId, array $entities, array $button, FieldableEntityInterface $parent): array
     {
         $tableId = Html::getUniqueId($htmlId . '-table');
         $listPluginDefinition = $this->entityReferenceListFormatterManager->getDefinition($this->getSetting('list'));
