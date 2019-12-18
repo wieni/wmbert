@@ -1,7 +1,7 @@
 {
     "name": "wieni/wmbert",
     "type": "drupal-module",
-    "description": "A more user-friendly entity reference list field widget.",
+    "description": "A more user-friendly entity reference list field widget for Drupal 8.",
     "license": "MIT",
     "authors": [
         {

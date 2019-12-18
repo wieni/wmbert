@@ -9,4 +9,4 @@ wmbert
 [![Total Downloads](https://poser.pugx.org/wieni/wmbert/downloads)](https://packagist.org/packages/wieni/wmbert)
 [![License](https://poser.pugx.org/wieni/wmbert/license)](https://packagist.org/packages/wieni/wmbert)
 
-> Better Entity Reference Table: A more user-friendly entity reference list field widget
+> Better Entity Reference Table: A more user-friendly entity reference list field widget for Drupal 8.
