@@ -3,9 +3,9 @@
 namespace Drupal\wmbert;
 
 use Drupal\Component\Plugin\PluginBase;
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
-use Drupal\Core\Entity\ContentEntityInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class EntityReferenceListFormatterPluginBase extends PluginBase implements EntityReferenceListFormatterInterface
@@ -25,9 +25,6 @@ abstract class EntityReferenceListFormatterPluginBase extends PluginBase impleme
         $this->entityRepository = $entityRepository;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function create(
         ContainerInterface $container,
         array $configuration,
@@ -60,9 +57,7 @@ abstract class EntityReferenceListFormatterPluginBase extends PluginBase impleme
         return $this;
     }
 
-    /**
-     * @deprecated Use EntityRepositoryInterface::getTranslationFromContext instead
-     */
+    /** @deprecated Use EntityRepositoryInterface::getTranslationFromContext instead */
     protected function getTranslatedEntity(EntityInterface $entity)
     {
         return $this->entityRepository->getTranslationFromContext($entity);

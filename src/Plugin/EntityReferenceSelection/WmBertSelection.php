@@ -14,11 +14,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * @EntityReferenceSelection(
- *   id = "wmbert",
- *   label = @Translation("WmBert selection"),
- *   group = "wmbert",
- *   weight = 1,
- *   deriver = "Drupal\wmbert\Plugin\Derivative\WmBertSelectionDeriver"
+ *     id = "wmbert",
+ *     label = @Translation("WmBert selection"),
+ *     group = "wmbert",
+ *     weight = 1,
+ *     deriver = "Drupal\wmbert\Plugin\Derivative\WmBertSelectionDeriver"
  * )
  */
 class WmBertSelection extends DefaultSelection
@@ -41,6 +41,24 @@ class WmBertSelection extends DefaultSelection
         parent::__construct($configuration, $pluginId, $pluginDefinition, $entityManager, $moduleHandler, $currentUser);
         $this->languageManager = $languageManager;
         $this->entityReferenceLabelFormatterManager = $entityReferenceLabelFormatterManager;
+    }
+
+    public static function create(
+        ContainerInterface $container,
+        array $configuration,
+        $pluginId,
+        $pluginDefinition
+    ) {
+        return new static(
+            $configuration,
+            $pluginId,
+            $pluginDefinition,
+            $container->get('entity.manager'),
+            $container->get('module_handler'),
+            $container->get('current_user'),
+            $container->get('language_manager'),
+            $container->get('plugin.manager.entity_reference_label_formatter')
+        );
     }
 
     public function defaultConfiguration()
@@ -86,7 +104,7 @@ class WmBertSelection extends DefaultSelection
         return $options;
     }
 
-    protected function buildEntityQuery($match = NULL, $match_operator = 'CONTAINS')
+    protected function buildEntityQuery($match = null, $match_operator = 'CONTAINS')
     {
         $query = parent::buildEntityQuery($match, $match_operator);
         $configuration = $this->getConfiguration();
@@ -105,26 +123,5 @@ class WmBertSelection extends DefaultSelection
         }
 
         return $query;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function create(
-        ContainerInterface $container,
-        array $configuration,
-        $pluginId,
-        $pluginDefinition
-    ) {
-        return new static(
-            $configuration,
-            $pluginId,
-            $pluginDefinition,
-            $container->get('entity.manager'),
-            $container->get('module_handler'),
-            $container->get('current_user'),
-            $container->get('language_manager'),
-            $container->get('plugin.manager.entity_reference_label_formatter')
-        );
     }
 }

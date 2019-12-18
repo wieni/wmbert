@@ -4,10 +4,10 @@ namespace Drupal\wmbert\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\Plugin\EntityReferenceSelection\PhpSelection;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Entity\Plugin\EntityReferenceSelection\PhpSelection;
 
 /**
  * Provides derivative plugins for the WmBertSelection plugin.
@@ -27,9 +27,6 @@ class WmBertSelectionDeriver extends DeriverBase implements ContainerDeriverInte
         $this->entityTypeManager = $entityTypeManager;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function create(ContainerInterface $container, $base_plugin_id)
     {
         return new static(
@@ -37,9 +34,6 @@ class WmBertSelectionDeriver extends DeriverBase implements ContainerDeriverInte
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getDerivativeDefinitions($base_plugin_definition)
     {
         foreach ($this->entityTypeManager->getDefinitions() as $entity_type_id => $entity_type) {

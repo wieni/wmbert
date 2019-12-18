@@ -8,15 +8,12 @@ use Drupal\wmbert\EntityReferenceLabelFormatterPluginBase;
 
 /**
  * @EntityReferenceLabelFormatter(
- *   id = "title",
- *   label = @Translation("Entity title"),
+ *     id = "title",
+ *     label = @Translation("Entity title"),
  * )
  */
 class Title extends EntityReferenceLabelFormatterPluginBase implements ContainerFactoryPluginInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function getLabel(EntityInterface $entity): string
     {
         $entity = $this->entityRepository->getTranslationFromContext($entity);

@@ -24,9 +24,6 @@ abstract class EntityReferenceLabelFormatterPluginBase extends PluginBase implem
         $this->entityRepository = $entityRepository;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function create(
         ContainerInterface $container,
         array $configuration,

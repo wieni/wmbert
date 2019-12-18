@@ -24,20 +24,20 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
  * @FieldWidget(
- *   id = "wmbert",
- *   label = @Translation("Better Entity Reference Table"),
- *   multiple_values = TRUE,
- *   field_types = {
- *     "entity_reference"
- *   }
+ *     id = "wmbert",
+ *     label = @Translation("Better Entity Reference Table"),
+ *     multiple_values = TRUE,
+ *     field_types = {
+ *         "entity_reference"
+ *     }
  * )
  */
 class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
 {
-    const ADD_SELECTION_SELECT = 'select';
-    const ADD_SELECTION_RADIOS = 'radios';
-    const ADD_SELECTION_AUTO_COMPLETE = 'auto_complete';
-    const ADD_SELECTION_NONE = 'none';
+    public const ADD_SELECTION_SELECT = 'select';
+    public const ADD_SELECTION_RADIOS = 'radios';
+    public const ADD_SELECTION_AUTO_COMPLETE = 'auto_complete';
+    public const ADD_SELECTION_NONE = 'none';
 
     /** @var AccountProxyInterface */
     protected $currentUser;
@@ -66,9 +66,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         $this->currentUser = $currentUser;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function create(ContainerInterface $container, array $configuration, $pluginId, $pluginDefinition)
     {
         return new static(
@@ -84,9 +81,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function formElement(
         FieldItemListInterface $items,
         $delta,
@@ -151,9 +145,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         return $element;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public static function defaultSettings()
     {
         $settings = parent::defaultSettings();
@@ -168,9 +159,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         return $settings;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function settingsForm(array $form, FormStateInterface $form_state)
     {
         $form = parent::settingsForm($form, $form_state);
@@ -252,10 +240,8 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         return $form;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function settingsSummary() {
+    public function settingsSummary()
+    {
         $summary = [];
 
         if ($value = $this->getSetting('list')) {
@@ -280,9 +266,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         return $summary;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function massageFormValues(array $values, array $form, FormStateInterface $form_state)
     {
         $ids = [];
@@ -358,9 +341,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         return NestedArray::getValue($formState->getUserInput(), array_merge($parents, ['add', 'entity']));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function flagErrors(
         FieldItemListInterface $items,
         ConstraintViolationListInterface $violations,
@@ -479,7 +459,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             ]];
         }
 
-
         if (!empty($entities) && !empty($listPlugin->getHeader())) {
             $list['#header'] = array_merge([''], $listPlugin->getHeader());
             $suffix = [];
@@ -499,7 +478,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         }
 
         foreach ($entities as $ind => $entity) {
-
             if (!$entity) {
                 continue;
             }

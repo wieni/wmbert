@@ -9,17 +9,14 @@ use Drupal\wmbert\EntityReferenceListFormatterPluginBase;
 
 /**
  * @EntityReferenceListFormatter(
- *   id = "title_bundle",
- *   label = @Translation("Entity title and bundle"),
+ *     id = "title_bundle",
+ *     label = @Translation("Entity title and bundle"),
  * )
  */
 class TitleBundle extends EntityReferenceListFormatterPluginBase implements ContainerFactoryPluginInterface
 {
     use StringTranslationTrait;
 
-    /**
-     * {@inheritdoc}
-     */
     public function getCells(EntityInterface $entity): array
     {
         $entity = $this->entityRepository->getTranslationFromContext($entity);
@@ -32,9 +29,6 @@ class TitleBundle extends EntityReferenceListFormatterPluginBase implements Cont
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getHeader(): array
     {
         return [
