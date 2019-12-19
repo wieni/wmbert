@@ -146,7 +146,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         $settings['add'] = 'select';
         $settings['add_placeholder'] = 'Select an entity';
         $settings['disable_duplicate_selection'] = true;
-        $settings['disable_parent_entity_selection'] = true;
         $settings['disable_remove'] = false;
         $settings['wrapper'] = true;
         return $settings;
@@ -196,14 +195,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             '#default_value' => $this->getSetting('disable_duplicate_selection'),
             '#title' => $this->t('Disable duplicate selection'),
             '#type' => 'checkbox',
-        ];
-
-        $form['disable_parent_entity_selection'] = [
-            '#default_value' => $this->getSetting('disable_parent_entity_selection')
-                && $this->referencesSameEntityType(),
-            '#title' => $this->t('Disable selection of parent entity'),
-            '#type' => 'checkbox',
-            '#disabled' => !$this->referencesSameEntityType(),
         ];
 
         $form['disable_remove'] = [
@@ -385,13 +376,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
 
         if ($this->getSetting('disable_duplicate_selection')) {
             $ignored = array_merge($ignored, array_keys($entities));
-        }
-
-        if (
-            $this->getSetting('disable_parent_entity_selection')
-            && $this->referencesSameEntityType()
-        ) {
-            $ignored = array_merge($ignored, [(int) $entity->id()]);
         }
 
         switch ($this->getSetting('add')) {
@@ -591,12 +575,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         unset($add['entity']['#options']['_none']);
         $add['entity']['#type'] = 'radios';
         return $add;
-    }
-
-    protected function referencesSameEntityType()
-    {
-        return $this->fieldDefinition->getTargetEntityTypeId()
-            === $this->fieldDefinition->getFieldStorageDefinition()->getSetting('target_type');
     }
 
     private function getNewSelectionOptions(): array

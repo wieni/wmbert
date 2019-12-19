@@ -3,7 +3,8 @@
 use Drupal\field\Entity\FieldConfig;
 
 /**
- * Move the label_formatter setting from the form display to the field handler_settings
+ * Move the label_formatter & disable_parent_entity_selection settings
+ * from the form display to the field handler_settings
  */
 function wmbert_update_8001()
 {
@@ -12,32 +13,38 @@ function wmbert_update_8001()
         ->loadMultiple();
     $fieldManager = \Drupal::getContainer()
         ->get('entity_field.manager');
+    $settingKeys = [
+        'disable_parent_entity_selection',
+        'label_formatter',
+    ];
 
     foreach ($formDisplays as $formDisplay) {
         $content = $formDisplay->get('content');
 
         foreach ($content as $fieldName => &$fieldDisplay) {
-            if (!isset($fieldDisplay['settings']['label_formatter'])) {
-                continue;
+            foreach ($settingKeys as $settingKey) {
+                if (!isset($fieldDisplay['settings'][$settingKey])) {
+                    continue;
+                }
+
+                /** @var FieldConfig[] $fieldDefinitions */
+                $fieldDefinitions = $fieldManager->getFieldDefinitions(
+                    $formDisplay->getTargetEntityTypeId(),
+                    $formDisplay->getTargetBundle()
+                );
+                $fieldDefinition = $fieldDefinitions[$fieldName];
+                $handlerSettings = $fieldDefinition->getSetting('handler_settings');
+
+                if (!empty($handlerSettings[$settingKey])) {
+                    continue;
+                }
+
+                $handlerSettings[$settingKey] = $fieldDisplay['settings'][$settingKey];
+                $fieldDefinition->setSetting('handler_settings', $handlerSettings);
+                $fieldDefinition->save();
+
+                unset($fieldDisplay['settings'][$settingKey]);
             }
-
-            /** @var FieldConfig[] $fieldDefinitions */
-            $fieldDefinitions = $fieldManager->getFieldDefinitions(
-                $formDisplay->getTargetEntityTypeId(),
-                $formDisplay->getTargetBundle()
-            );
-            $fieldDefinition = $fieldDefinitions[$fieldName];
-            $handlerSettings = $fieldDefinition->getSetting('handler_settings');
-
-            if (!empty($handlerSettings['label_formatter'])) {
-                continue;
-            }
-
-            $handlerSettings['label_formatter'] = $fieldDisplay['settings']['label_formatter'];
-            $fieldDefinition->setSetting('handler_settings', $handlerSettings);
-            $fieldDefinition->save();
-
-            unset($fieldDisplay['settings']['label_formatter']);
         }
 
         $formDisplay->set('content', $content);

@@ -9,6 +9,7 @@ use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\wmbert\EntityReferenceLabelFormatterManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -24,6 +25,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class WmBertSelection extends DefaultSelection
 {
+    /** @var RouteMatchInterface */
+    protected $routeMatch;
     /** @var LanguageManagerInterface */
     protected $languageManager;
     /** @var EntityReferenceLabelFormatterManager */
@@ -36,10 +39,12 @@ class WmBertSelection extends DefaultSelection
         EntityManagerInterface $entityManager,
         ModuleHandlerInterface $moduleHandler,
         AccountInterface $currentUser,
+        RouteMatchInterface $routeMatch,
         LanguageManagerInterface $languageManager,
         EntityReferenceLabelFormatterManager $entityReferenceLabelFormatterManager
     ) {
         parent::__construct($configuration, $pluginId, $pluginDefinition, $entityManager, $moduleHandler, $currentUser);
+        $this->routeMatch = $routeMatch;
         $this->languageManager = $languageManager;
         $this->entityReferenceLabelFormatterManager = $entityReferenceLabelFormatterManager;
     }
@@ -57,6 +62,7 @@ class WmBertSelection extends DefaultSelection
             $container->get('entity.manager'),
             $container->get('module_handler'),
             $container->get('current_user'),
+            $container->get('current_route_match'),
             $container->get('language_manager'),
             $container->get('plugin.manager.entity_reference_label_formatter')
         );
@@ -67,6 +73,7 @@ class WmBertSelection extends DefaultSelection
         return [
             'ignored_entities' => [],
             'same_language_only' => false,
+            'disable_parent_entity_selection' => false,
             'label_formatter' => 'title',
             'result_amount' => 0,
         ] + parent::defaultConfiguration();
@@ -102,6 +109,15 @@ class WmBertSelection extends DefaultSelection
             '#title' => $this->t('Same language only'),
             '#description' => $this->t('Only include entities with the same language as the active content language.'),
             '#type' => 'checkbox',
+        ];
+
+        $form['disable_parent_entity_selection'] = [
+            '#default_value' => $configuration['disable_parent_entity_selection']
+                && $this->referencesSameEntityType(),
+            '#title' => $this->t('Disable selection of parent entity'),
+            '#description' => $this->t('Prevent the entity this field is attached to to be referenced.'),
+            '#type' => 'checkbox',
+            '#disabled' => !$this->referencesSameEntityType(),
         ];
 
         return $form;
@@ -147,6 +163,11 @@ class WmBertSelection extends DefaultSelection
         $entityType = $this->entityManager->getDefinition($configuration['target_type']);
 
         $ignored = $configuration['ignored_entities'];
+
+        if ($configuration['disable_parent_entity_selection']) {
+            $ignored[] = $configuration['entity']->id();
+        }
+
         if ($entityType instanceof EntityTypeInterface && !empty($ignored)) {
             $query->condition($entityType->getKey('id'), $ignored, 'NOT IN');
         }
@@ -159,5 +180,23 @@ class WmBertSelection extends DefaultSelection
         }
 
         return $query;
+    }
+
+    protected function referencesSameEntityType(): bool
+    {
+        $configuration = $this->getConfiguration();
+
+        if (!empty($configuration['entity'])) {
+            $entityTypeId = $configuration['entity']->getEntityTypeId();
+        } else {
+            $entityTypeId = $this->routeMatch->getParameter('entity_type_id');
+        }
+
+        if (!$entityTypeId) {
+            // Unsure, so just show the option
+            return true;
+        }
+
+        return $entityTypeId === $configuration['target_type'];
     }
 }
