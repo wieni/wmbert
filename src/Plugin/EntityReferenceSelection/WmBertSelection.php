@@ -89,6 +89,13 @@ class WmBertSelection extends DefaultSelection
             ),
         ];
 
+        $form['same_language_only'] = [
+            '#default_value' => $configuration['same_language_only'],
+            '#title' => $this->t('Same language only'),
+            '#description' => $this->t('Only include entities with the same language as the active content language.'),
+            '#type' => 'checkbox',
+        ];
+
         return $form;
     }
 
