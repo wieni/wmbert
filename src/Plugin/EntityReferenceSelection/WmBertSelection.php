@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\wmbert\EntityReferenceLabelFormatterManager;
@@ -69,6 +70,26 @@ class WmBertSelection extends DefaultSelection
             'label_formatter' => 'title',
             'result_amount' => 0,
         ] + parent::defaultConfiguration();
+    }
+
+    public function buildConfigurationForm(array $form, FormStateInterface $form_state)
+    {
+        $form = parent::buildConfigurationForm($form, $form_state);
+        $configuration = $this->getConfiguration();
+
+        $form['label_formatter'] = [
+            '#default_value' => $configuration['label_formatter'],
+            '#title' => $this->t('Label formatter plugin'),
+            '#type' => 'select',
+            '#options' => array_map(
+                function (array $definition) {
+                    return $definition['label'];
+                },
+                $this->entityReferenceLabelFormatterManager->getDefinitions()
+            ),
+        ];
+
+        return $form;
     }
 
     public function getReferenceableEntities($match = null, $match_operator = 'CONTAINS', $limit = 0)

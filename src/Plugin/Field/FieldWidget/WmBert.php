@@ -15,7 +15,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Validation\Plugin\Validation\Constraint\NotNullConstraint;
-use Drupal\wmbert\EntityReferenceLabelFormatterManager;
 use Drupal\wmbert\EntityReferenceListFormatterInterface;
 use Drupal\wmbert\EntityReferenceListFormatterManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -43,8 +42,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
     protected $currentUser;
     /** @var EntityReferenceListFormatterManager */
     protected $entityReferenceListFormatterManager;
-    /** @var EntityReferenceLabelFormatterManager */
-    protected $entityReferenceLabelFormatterManager;
     /** @var EntityTypeManagerInterface */
     protected $entityTypeManager;
 
@@ -55,13 +52,11 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         array $settings,
         array $thirdPartySettings,
         EntityReferenceListFormatterManager $entityReferenceListFormatterManager,
-        EntityReferenceLabelFormatterManager $entityReferenceLabelFormatterManager,
         EntityTypeManagerInterface $entityTypeManager,
         AccountProxyInterface $currentUser
     ) {
         parent::__construct($pluginId, $pluginDefinition, $fieldDefinition, $settings, $thirdPartySettings);
         $this->entityReferenceListFormatterManager = $entityReferenceListFormatterManager;
-        $this->entityReferenceLabelFormatterManager = $entityReferenceLabelFormatterManager;
         $this->entityTypeManager = $entityTypeManager;
         $this->currentUser = $currentUser;
     }
@@ -75,7 +70,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             $configuration['settings'],
             $configuration['third_party_settings'],
             $container->get('plugin.manager.entity_reference_list_formatter'),
-            $container->get('plugin.manager.entity_reference_label_formatter'),
             $container->get('entity_type.manager'),
             $container->get('current_user')
         );
@@ -149,7 +143,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
     {
         $settings = parent::defaultSettings();
         $settings['list'] = 'title';
-        $settings['label_formatter'] = 'title';
         $settings['add'] = 'select';
         $settings['add_placeholder'] = 'Select an entity';
         $settings['disable_duplicate_selection'] = true;
@@ -173,18 +166,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
                     return $definition['label'];
                 },
                 $this->entityReferenceListFormatterManager->getDefinitions()
-            ),
-        ];
-
-        $form['label_formatter'] = [
-            '#default_value' => $this->getSetting('label_formatter'),
-            '#title' => $this->t('Label formatter plugin'),
-            '#type' => 'select',
-            '#options' => array_map(
-                function (array $definition) {
-                    return $definition['label'];
-                },
-                $this->entityReferenceLabelFormatterManager->getDefinitions()
             ),
         ];
 
@@ -246,10 +227,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
 
         if ($value = $this->getSetting('list')) {
             $summary[] = $this->t('List formatter: @value', ['@value' => $value]);
-        }
-
-        if ($value = $this->getSetting('label_formatter')) {
-            $summary[] = $this->t('Label formatter: @value', ['@value' => $value]);
         }
 
         if ($value = $this->getSetting('add')) {
@@ -569,7 +546,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         $selectionSettings = $this->getFieldSetting('handler_settings') + [
                 'match_operator' => 'CONTAINS',
                 'ignored_entities' => $ignored,
-                'label_formatter' => $this->getSetting('label_formatter'),
             ];
 
         if ($this->getSetting('disable_duplicate_selection')) {

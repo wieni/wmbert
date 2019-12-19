@@ -1,0 +1,47 @@
+<?php
+
+use Drupal\field\Entity\FieldConfig;
+
+/**
+ * Move the label_formatter setting from the form display to the field handler_settings
+ */
+function wmbert_update_8001()
+{
+    $formDisplays = \Drupal::entityTypeManager()
+        ->getStorage('entity_form_display')
+        ->loadMultiple();
+    $fieldManager = \Drupal::getContainer()
+        ->get('entity_field.manager');
+
+    foreach ($formDisplays as $formDisplay) {
+        $content = $formDisplay->get('content');
+
+        foreach ($content as $fieldName => &$fieldDisplay) {
+            if (!isset($fieldDisplay['settings']['label_formatter'])) {
+                continue;
+            }
+
+            /** @var FieldConfig[] $fieldDefinitions */
+            $fieldDefinitions = $fieldManager->getFieldDefinitions(
+                $formDisplay->getTargetEntityTypeId(),
+                $formDisplay->getTargetBundle()
+            );
+            $fieldDefinition = $fieldDefinitions[$fieldName];
+            $handlerSettings = $fieldDefinition->getSetting('handler_settings');
+
+            if (!empty($handlerSettings['label_formatter'])) {
+                continue;
+            }
+
+            $handlerSettings['label_formatter'] = $fieldDisplay['settings']['label_formatter'];
+            $fieldDefinition->setSetting('handler_settings', $handlerSettings);
+            $fieldDefinition->save();
+
+            unset($fieldDisplay['settings']['label_formatter']);
+        }
+
+        $formDisplay->set('content', $content);
+        $formDisplay->save();
+    }
+}
+
