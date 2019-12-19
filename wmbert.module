@@ -1,0 +1,39 @@
+<?php
+
+use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\field\Entity\FieldConfig;
+
+function wmbert_entity_presave(EntityInterface $entity)
+{
+    if (!$entity instanceof EntityFormDisplayInterface) {
+        return;
+    }
+
+    $handler = sprintf('wmbert:%s', $entity->getTargetEntityTypeId());
+    $fieldManager = \Drupal::getContainer()->get('entity_field.manager');
+
+    foreach ($entity->get('content') as $fieldName => $fieldDisplay) {
+        if (!isset($fieldDisplay['type'], $fieldDisplay['settings'])) {
+            continue;
+        }
+
+        if ($fieldDisplay['type'] !== 'wmbert') {
+            continue;
+        }
+
+        /** @var FieldConfig[] $fieldDefinitions */
+        $fieldDefinitions = $fieldManager->getFieldDefinitions(
+            $entity->getTargetEntityTypeId(),
+            $entity->getTargetBundle()
+        );
+        $fieldDefinition = $fieldDefinitions[$fieldName];
+
+        if ($fieldDefinition->getSetting('handler') === $handler) {
+            continue;
+        }
+
+        $fieldDefinition->setSetting('handler', $handler);
+        $fieldDefinition->save();
+    }
+}
