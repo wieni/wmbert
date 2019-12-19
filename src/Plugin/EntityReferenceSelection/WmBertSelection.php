@@ -3,14 +3,11 @@
 namespace Drupal\wmbert\Plugin\EntityReferenceSelection;
 
 use Drupal\Component\Utility\Html;
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
-use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\wmbert\EntityReferenceLabelFormatterManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -30,24 +27,7 @@ class WmBertSelection extends DefaultSelection
     /** @var LanguageManagerInterface */
     protected $languageManager;
     /** @var EntityReferenceLabelFormatterManager */
-    protected $entityReferenceLabelFormatterManager;
-
-    public function __construct(
-        array $configuration,
-        $pluginId,
-        $pluginDefinition,
-        EntityManagerInterface $entityManager,
-        ModuleHandlerInterface $moduleHandler,
-        AccountInterface $currentUser,
-        RouteMatchInterface $routeMatch,
-        LanguageManagerInterface $languageManager,
-        EntityReferenceLabelFormatterManager $entityReferenceLabelFormatterManager
-    ) {
-        parent::__construct($configuration, $pluginId, $pluginDefinition, $entityManager, $moduleHandler, $currentUser);
-        $this->routeMatch = $routeMatch;
-        $this->languageManager = $languageManager;
-        $this->entityReferenceLabelFormatterManager = $entityReferenceLabelFormatterManager;
-    }
+    protected $labelFormatterManager;
 
     public static function create(
         ContainerInterface $container,
@@ -55,17 +35,12 @@ class WmBertSelection extends DefaultSelection
         $pluginId,
         $pluginDefinition
     ) {
-        return new static(
-            $configuration,
-            $pluginId,
-            $pluginDefinition,
-            $container->get('entity.manager'),
-            $container->get('module_handler'),
-            $container->get('current_user'),
-            $container->get('current_route_match'),
-            $container->get('language_manager'),
-            $container->get('plugin.manager.entity_reference_label_formatter')
-        );
+        $instance = parent::create($container, $configuration, $pluginId, $pluginDefinition);
+        $instance->routeMatch = $container->get('current_route_match');
+        $instance->languageManager = $container->get('language_manager');
+        $instance->labelFormatterManager = $container->get('plugin.manager.entity_reference_label_formatter');
+
+        return $instance;
     }
 
     public function defaultConfiguration()
@@ -92,7 +67,7 @@ class WmBertSelection extends DefaultSelection
                 function (array $definition) {
                     return $definition['label'];
                 },
-                $this->entityReferenceLabelFormatterManager->getDefinitions()
+                $this->labelFormatterManager->getDefinitions()
             ),
         ];
 
@@ -145,8 +120,8 @@ class WmBertSelection extends DefaultSelection
         }
 
         $options = [];
-        $entities = $this->entityManager->getStorage($target_type)->loadMultiple($result);
-        $formatter = $this->entityReferenceLabelFormatterManager->createInstance($configuration['label_formatter']);
+        $entities = $this->entityTypeManager->getStorage($target_type)->loadMultiple($result);
+        $formatter = $this->labelFormatterManager->createInstance($configuration['label_formatter']);
 
         foreach ($entities as $entity_id => $entity) {
             $bundle = $entity->bundle();
@@ -160,7 +135,7 @@ class WmBertSelection extends DefaultSelection
     {
         $query = parent::buildEntityQuery($match, $match_operator);
         $configuration = $this->getConfiguration();
-        $entityType = $this->entityManager->getDefinition($configuration['target_type']);
+        $entityType = $this->entityTypeManager->getDefinition($configuration['target_type']);
 
         $ignored = $configuration['ignored_entities'];
 

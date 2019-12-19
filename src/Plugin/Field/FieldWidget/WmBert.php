@@ -8,11 +8,9 @@ use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Validation\Plugin\Validation\Constraint\NotNullConstraint;
 use Drupal\wmbert\EntityReferenceListFormatterInterface;
@@ -31,7 +29,7 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
  *     }
  * )
  */
-class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
+class WmBert extends WidgetBase
 {
     public const ADD_SELECTION_SELECT = 'select';
     public const ADD_SELECTION_RADIOS = 'radios';
@@ -41,38 +39,18 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
     /** @var AccountProxyInterface */
     protected $currentUser;
     /** @var EntityReferenceListFormatterManager */
-    protected $entityReferenceListFormatterManager;
+    protected $listFormatterManager;
     /** @var EntityTypeManagerInterface */
     protected $entityTypeManager;
 
-    public function __construct(
-        $pluginId,
-        $pluginDefinition,
-        FieldDefinitionInterface $fieldDefinition,
-        array $settings,
-        array $thirdPartySettings,
-        EntityReferenceListFormatterManager $entityReferenceListFormatterManager,
-        EntityTypeManagerInterface $entityTypeManager,
-        AccountProxyInterface $currentUser
-    ) {
-        parent::__construct($pluginId, $pluginDefinition, $fieldDefinition, $settings, $thirdPartySettings);
-        $this->entityReferenceListFormatterManager = $entityReferenceListFormatterManager;
-        $this->entityTypeManager = $entityTypeManager;
-        $this->currentUser = $currentUser;
-    }
-
     public static function create(ContainerInterface $container, array $configuration, $pluginId, $pluginDefinition)
     {
-        return new static(
-            $pluginId,
-            $pluginDefinition,
-            $configuration['field_definition'],
-            $configuration['settings'],
-            $configuration['third_party_settings'],
-            $container->get('plugin.manager.entity_reference_list_formatter'),
-            $container->get('entity_type.manager'),
-            $container->get('current_user')
-        );
+        $instance = parent::create($container, $configuration, $pluginId, $pluginDefinition);
+        $instance->listFormatterManager = $container->get('plugin.manager.entity_reference_list_formatter');
+        $instance->entityTypeManager = $container->get('entity_type.manager');
+        $instance->currentUser = $container->get('current_user');
+
+        return $instance;
     }
 
     public function formElement(
@@ -164,7 +142,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
                 function (array $definition) {
                     return $definition['label'];
                 },
-                $this->entityReferenceListFormatterManager->getDefinitions()
+                $this->listFormatterManager->getDefinitions()
             ),
         ];
 
@@ -398,9 +376,9 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
     protected function getList(string $htmlId, array $entities, array $button, FieldableEntityInterface $parent): array
     {
         $tableId = Html::getUniqueId($htmlId . '-table');
-        $listPluginDefinition = $this->entityReferenceListFormatterManager->getDefinition($this->getSetting('list'));
+        $listPluginDefinition = $this->listFormatterManager->getDefinition($this->getSetting('list'));
         /* @var EntityReferenceListFormatterInterface $listPlugin */
-        $listPlugin = $this->entityReferenceListFormatterManager
+        $listPlugin = $this->listFormatterManager
             ->createInstance($listPluginDefinition['id'])
             ->setParentEntity($parent);
 
@@ -457,11 +435,11 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
 
             if (!$this->getSetting('disable_remove')) {
                 $row['remove'] = [
-                        '#depth' => 2,
-                        '#name' => 'remove_' . $ind . '_' . $button['#unique_base_id'],
-                        '#src' => 'core/misc/icons/000000/ex.svg',
-                        '#type' => 'image_button',
-                    ] + $button;
+                    '#depth' => 2,
+                    '#name' => 'remove_' . $ind . '_' . $button['#unique_base_id'],
+                    '#src' => 'core/misc/icons/000000/ex.svg',
+                    '#type' => 'image_button',
+                ] + $button;
             }
 
             if ($this->fieldDefinition->getFieldStorageDefinition()->isMultiple()) {
@@ -501,36 +479,36 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         return [
             'entity' => [
                 '#ajax' => [
-                        'trigger_as' => [
-                            'name' => 'select_add_' . $button['#unique_base_id'],
-                        ],
-                    ] + $button['#ajax'],
+                    'trigger_as' => [
+                        'name' => 'select_add_' . $button['#unique_base_id'],
+                    ],
+                ] + $button['#ajax'],
                 '#options' => $options,
                 '#placeholder' => $this->getSetting('add_placeholder'),
                 '#type' => 'select',
             ],
             'select' => [
-                    '#ajax' => [
-                            'event' => 'autocompleteclose',
-                        ] + $button['#ajax'],
-                    '#attributes' => [
-                        'class' => ['js-hide'],
-                    ],
-                    '#depth' => 1,
-                    '#ignored_entities' => $ignored,
-                    '#parent_entity_id' => $entity->id(),
-                    '#name' => 'select_add_' . $button['#unique_base_id'],
-                    '#value' => $this->t('add'),
-                ] + $button,
+                '#ajax' => [
+                        'event' => 'autocompleteclose',
+                    ] + $button['#ajax'],
+                '#attributes' => [
+                    'class' => ['js-hide'],
+                ],
+                '#depth' => 1,
+                '#ignored_entities' => $ignored,
+                '#parent_entity_id' => $entity->id(),
+                '#name' => 'select_add_' . $button['#unique_base_id'],
+                '#value' => $this->t('add'),
+            ] + $button,
         ];
     }
 
     protected function getAddByAutoComplete(EntityInterface $entity, array $button, array $entities, array $ignored): array
     {
         $selectionSettings = $this->getFieldSetting('handler_settings') + [
-                'match_operator' => 'CONTAINS',
-                'ignored_entities' => $ignored,
-            ];
+            'match_operator' => 'CONTAINS',
+            'ignored_entities' => $ignored,
+        ];
 
         if ($this->getSetting('disable_duplicate_selection')) {
             $selectionSettings['view']['arguments'][] = implode(',', array_keys($entities));
@@ -554,18 +532,18 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
                 '#size' => $this->getSetting('size'),
             ],
             'auto_complete' => [
-                    '#ajax' => [
-                            'event' => 'autocompleteclose',
-                        ] + $button['#ajax'],
-                    '#attributes' => [
-                        'class' => ['js-hide'],
-                    ],
-                    '#ignored_entities' => $ignored,
-                    '#parent_entity_id' => $entity->id(),
-                    '#depth' => 1,
-                    '#name' => 'auto_complete_add_' . $button['#unique_base_id'],
-                    '#value' => $this->t('add'),
-                ] + $button,
+                '#ajax' => [
+                        'event' => 'autocompleteclose',
+                    ] + $button['#ajax'],
+                '#attributes' => [
+                    'class' => ['js-hide'],
+                ],
+                '#ignored_entities' => $ignored,
+                '#parent_entity_id' => $entity->id(),
+                '#depth' => 1,
+                '#name' => 'auto_complete_add_' . $button['#unique_base_id'],
+                '#value' => $this->t('add'),
+            ] + $button,
         ];
     }
 
