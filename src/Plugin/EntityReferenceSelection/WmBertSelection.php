@@ -89,6 +89,14 @@ class WmBertSelection extends DefaultSelection
             ),
         ];
 
+        $form['result_amount'] = [
+            '#default_value' => $configuration['result_amount'],
+            '#title' => $this->t('Number of results'),
+            '#description' => $this->t('The number of suggestions that will be listed. Use <em>0</em> to remove the limit.'),
+            '#type' => 'number',
+            '#min' => 0,
+        ];
+
         $form['same_language_only'] = [
             '#default_value' => $configuration['same_language_only'],
             '#title' => $this->t('Same language only'),
