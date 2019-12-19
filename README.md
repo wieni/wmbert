@@ -32,6 +32,7 @@ documentation](https://www.drupal.org/docs/user_guide/en/structure-widgets.html)
 
 The field widget has several configuration options to change its
 behaviour:
+
 #### List formatter plugin
 Changes the way the referenced entities are formatted in the table. Out
 of the box, two implementations are provided:
@@ -39,14 +40,6 @@ of the box, two implementations are provided:
 [_Entity title and bundle_](src/Plugin/EntityReferenceListFormatter/TitleBundle.php).
 Custom implementations can be provided through plugins with the
 `EntityReferenceListFormatter` annotation.
-
-#### Label formatter plugin
-Changes the way entities are formatted in search results. Out of the
-box, two implementations are provided:
-[_Entity title_](src/Plugin/EntityReferenceLabelFormatter/Title.php) and
-[_Entity title and bundle_](src/Plugin/EntityReferenceLabelFormatter/TitleBundle.php).
-Custom implementations can be provided through plugins with the
-`EntityReferenceLabelFormatter` annotation.
 
 #### Add entities selection
 Changes the type of widget:
@@ -61,15 +54,39 @@ Changes the type of widget:
 Makes sure the same entity cannot be referenced more than once in the
 same widget.
 
-#### Disable selection of parent entity
-When the widget is rendered in an entity form, this option makes sure
-the entity of the form cannot be referenced in the widget.
-
 #### Disable remove
 Hides the button to remove individual table items.
 
 #### Add a wrapper (fieldset)
 Changes whether the widget is wrapped in a fieldset.
+
+### Reference method
+This module provides an entity reference method with some additional
+features. This method is automatically enabled when changing the form
+display of a field to the wmbert widget, but can also be changed
+manually on the field edit page.
+
+The reference method has several configuration options to change its
+behaviour:
+
+#### Label formatter plugin
+Changes the way entities are formatted in search results. Out of the
+box, two implementations are provided:
+[_Entity title_](src/Plugin/EntityReferenceLabelFormatter/Title.php) and
+[_Entity title and bundle_](src/Plugin/EntityReferenceLabelFormatter/TitleBundle.php).
+Custom implementations can be provided through plugins with the
+`EntityReferenceLabelFormatter` annotation.
+
+#### Number of results
+The number of suggestions that will be listed. Use 0 to remove the limit.
+
+#### Same language only
+Only include entities with the same language as the active content
+language.
+
+#### Disable selection of parent entity
+When the widget is rendered in an entity form, this option makes sure
+the entity of the form cannot be referenced in the widget.
 
 ## Maintainers
 * [**Hans Langouche**](https://github.com/HnLn) - *Initial 
