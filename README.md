@@ -88,11 +88,6 @@ language.
 When the widget is rendered in an entity form, this option makes sure
 the entity of the form cannot be referenced in the widget.
 
-## Maintainers
-* [**Hans Langouche**](https://github.com/HnLn) - *Initial 
-  work*
-* [**Dieter Holvoet**](https://github.com/DieterHolvoet)
-
 See also the list of
 [contributors](https://github.com/wieni/wmmailable/contributors) who
 participated in this project.
@@ -103,7 +98,7 @@ All notable changes to this project will be documented in the
 
 ## Security
 If you discover any security-related issues, please email
-[info@wieni.be](mailto:info@wieni.be) instead of using the issue
+[security@wieni.be](mailto:security@wieni.be) instead of using the issue
 tracker.
 
 ## License
