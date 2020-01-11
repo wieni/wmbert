@@ -138,9 +138,10 @@ class WmBertSelection extends DefaultSelection
         $entityType = $this->entityTypeManager->getDefinition($configuration['target_type']);
 
         $ignored = $configuration['ignored_entities'];
+        $entity = $configuration['entity'];
 
-        if ($configuration['disable_parent_entity_selection']) {
-            $ignored[] = $configuration['entity']->id();
+        if ($entity && $configuration['disable_parent_entity_selection']) {
+            $ignored[] = $entity->id();
         }
 
         if ($entityType instanceof EntityTypeInterface && !empty($ignored)) {
