@@ -27,6 +27,11 @@ function wmbert_entity_presave(EntityInterface $entity)
             $entity->getTargetEntityTypeId(),
             $entity->getTargetBundle()
         );
+
+        if (empty($fieldDefinitions[$fieldName])) {
+            continue;
+        }
+
         $fieldDefinition = $fieldDefinitions[$fieldName];
 
         if ($fieldDefinition->getSetting('handler') === $handler) {
