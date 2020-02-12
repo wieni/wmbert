@@ -5,8 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.7.1] - 2020-02-12
 ### Changed
 - Remove maintainers section & update security email address in README
+- Update .gitignore
+
+### Fixed
+- Fix error on entity presave when field does not exist anymore
+- Fix error when selection handler doesn't have an entity
 
 ## [1.7.0] - 2019-12-19
 ### Added
