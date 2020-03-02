@@ -406,14 +406,11 @@ class WmBert extends WidgetBase
             if (!$this->getSetting('disable_remove')) {
                 $suffix[] = [];
             }
-            // Weight column.
-            if (isset($entities[1])) {
-                $suffix[] = [];
-            }
 
-            if (!empty($suffix)) {
-                $list['#header'] = array_merge($list['#header'], $suffix);
-            }
+            // Weight column.
+            $suffix[] = [];
+
+            $list['#header'] = array_merge($list['#header'], $suffix);
         }
 
         foreach ($entities as $ind => $entity) {

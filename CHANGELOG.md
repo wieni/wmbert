@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.2] - 2020-03-02
+### Fixed
+- Fix weight column showing if only one entity is selected
+
 ## [1.7.1] - 2020-02-12
 ### Changed
 - Remove maintainers section & update security email address in README
