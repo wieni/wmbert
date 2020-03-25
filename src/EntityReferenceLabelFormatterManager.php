@@ -22,6 +22,7 @@ class EntityReferenceLabelFormatterManager extends DefaultPluginManager
             EntityReferenceLabelFormatterInterface::class,
             EntityReferenceLabelFormatter::class
         );
+        $this->alterInfo('wmbert_entity_reference_label_formatter');
         $this->setCacheBackend($cacheBackend, 'wmbert_entity_reference_label_formatter');
     }
 }

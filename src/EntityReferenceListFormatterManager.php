@@ -22,6 +22,7 @@ class EntityReferenceListFormatterManager extends DefaultPluginManager
             EntityReferenceListFormatterInterface::class,
             EntityReferenceListFormatter::class
         );
+        $this->alterInfo('wmbert_entity_reference_list_formatter');
         $this->setCacheBackend($cacheBackend, 'wmbert_entity_reference_list_formatter');
     }
 }
