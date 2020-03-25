@@ -3,7 +3,6 @@
 namespace Drupal\wmbert\Plugin\EntityReferenceListFormatter;
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\wmbert\EntityReferenceListFormatterPluginBase;
 
@@ -13,7 +12,7 @@ use Drupal\wmbert\EntityReferenceListFormatterPluginBase;
  *     label = @Translation("Entity title and bundle"),
  * )
  */
-class TitleBundle extends EntityReferenceListFormatterPluginBase implements ContainerFactoryPluginInterface
+class TitleBundle extends EntityReferenceListFormatterPluginBase
 {
     use StringTranslationTrait;
 

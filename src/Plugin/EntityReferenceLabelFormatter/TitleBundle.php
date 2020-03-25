@@ -3,7 +3,6 @@
 namespace Drupal\wmbert\Plugin\EntityReferenceLabelFormatter;
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\wmbert\EntityReferenceLabelFormatterPluginBase;
 
 /**
@@ -12,7 +11,7 @@ use Drupal\wmbert\EntityReferenceLabelFormatterPluginBase;
  *     label = @Translation("Entity title and bundle"),
  * )
  */
-class TitleBundle extends EntityReferenceLabelFormatterPluginBase implements ContainerFactoryPluginInterface
+class TitleBundle extends EntityReferenceLabelFormatterPluginBase
 {
     public function getLabel(EntityInterface $entity): string
     {

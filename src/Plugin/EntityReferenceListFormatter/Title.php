@@ -3,7 +3,6 @@
 namespace Drupal\wmbert\Plugin\EntityReferenceListFormatter;
 
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\wmbert\EntityReferenceListFormatterPluginBase;
 
 /**
@@ -12,7 +11,7 @@ use Drupal\wmbert\EntityReferenceListFormatterPluginBase;
  *     label = @Translation("Entity title"),
  * )
  */
-class Title extends EntityReferenceListFormatterPluginBase implements ContainerFactoryPluginInterface
+class Title extends EntityReferenceListFormatterPluginBase
 {
     public function getCells(EntityInterface $entity): array
     {
