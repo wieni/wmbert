@@ -11,6 +11,7 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Validation\Plugin\Validation\Constraint\NotNullConstraint;
 use Drupal\wmbert\EntityReferenceListFormatterInterface;
@@ -29,7 +30,7 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
  *     }
  * )
  */
-class WmBert extends WidgetBase
+class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
 {
     public const ADD_SELECTION_SELECT = 'select';
     public const ADD_SELECTION_RADIOS = 'radios';
@@ -45,7 +46,13 @@ class WmBert extends WidgetBase
 
     public static function create(ContainerInterface $container, array $configuration, $pluginId, $pluginDefinition)
     {
-        $instance = parent::create($container, $configuration, $pluginId, $pluginDefinition);
+        $instance = new static(
+            $pluginId,
+            $pluginDefinition,
+            $configuration['field_definition'],
+            $configuration['settings'],
+            $configuration['third_party_settings']
+        );
         $instance->listFormatterManager = $container->get('plugin.manager.entity_reference_list_formatter');
         $instance->entityTypeManager = $container->get('entity_type.manager');
         $instance->currentUser = $container->get('current_user');

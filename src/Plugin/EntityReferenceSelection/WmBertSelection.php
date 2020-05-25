@@ -4,6 +4,7 @@ namespace Drupal\wmbert\Plugin\EntityReferenceSelection;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
@@ -26,6 +27,8 @@ class WmBertSelection extends DefaultSelection
     protected $routeMatch;
     /** @var LanguageManagerInterface */
     protected $languageManager;
+    /** @var EntityTypeManagerInterface */
+    protected $entityTypeManager;
     /** @var EntityReferenceLabelFormatterManager */
     protected $labelFormatterManager;
 
@@ -38,6 +41,7 @@ class WmBertSelection extends DefaultSelection
         $instance = parent::create($container, $configuration, $pluginId, $pluginDefinition);
         $instance->routeMatch = $container->get('current_route_match');
         $instance->languageManager = $container->get('language_manager');
+        $instance->entityTypeManager = $container->get('entity_type.manager');
         $instance->labelFormatterManager = $container->get('plugin.manager.entity_reference_label_formatter');
 
         return $instance;

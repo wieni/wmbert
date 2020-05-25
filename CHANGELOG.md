@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.1] - 2020-05-25
+### Fixed
+- Fix issues with & increase minimum core version to Drupal 8.6
+
 ## [1.8.0] - 2020-03-25
 ### Added
 - Add plugin definition alter hooks
