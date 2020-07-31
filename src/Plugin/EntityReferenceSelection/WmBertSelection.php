@@ -144,7 +144,7 @@ class WmBertSelection extends DefaultSelection
         $ignored = $configuration['ignored_entities'];
         $entity = $configuration['entity'];
 
-        if ($entity && $configuration['disable_parent_entity_selection']) {
+        if ($entity && !$entity->isNew() && $configuration['disable_parent_entity_selection']) {
             $ignored[] = $entity->id();
         }
 

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.2] - 2020-07-31
+### Fixed
+- Fix issue when adding a new entity
+
 ## [1.8.1] - 2020-05-25
 ### Fixed
 - Fix issues with & increase minimum core version to Drupal 8.6
