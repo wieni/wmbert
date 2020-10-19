@@ -1,6 +1,6 @@
 .field--widget-wmbert table th:first-of-type,
 .field--widget-wmbert table tr td:first-of-type {
-    display: none;
+    display: none !important;
 }
 
 .field--widget-wmbert .tableresponsive-toggle-columns ~ table thead th:first-of-type,
