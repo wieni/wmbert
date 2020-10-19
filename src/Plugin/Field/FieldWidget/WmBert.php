@@ -388,6 +388,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         $listPlugin = $this->listFormatterManager
             ->createInstance($listPluginDefinition['id'])
             ->setParentEntity($parent);
+        $isMultiple = $this->fieldDefinition->getFieldStorageDefinition()->isMultiple();
 
         $list = [
             '#attributes' => [
@@ -397,7 +398,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             '#type' => 'table',
         ];
 
-        if ($this->fieldDefinition->getFieldStorageDefinition()->isMultiple()) {
+        if ($isMultiple) {
             $list['#tabledrag'] = [[
                 'action' => 'order',
                 'group' => 'wmbert-order-weight',
@@ -407,17 +408,16 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
 
         if (!empty($entities) && !empty($listPlugin->getHeader())) {
             $list['#header'] = array_merge([''], $listPlugin->getHeader());
-            $suffix = [];
 
             // Remove column.
             if (!$this->getSetting('disable_remove')) {
-                $suffix[] = [];
+                $list['#header'][] = $this->t('Operations');
             }
 
-            // Weight column.
-            $suffix[] = [];
-
-            $list['#header'] = array_merge($list['#header'], $suffix);
+            if ($isMultiple) {
+                // Weight column.
+                $list['#header'][] = [];
+            }
         }
 
         foreach ($entities as $ind => $entity) {
@@ -425,25 +425,24 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
                 continue;
             }
 
-            $row = [
-                '#attributes' => [
-                    'class' => ['draggable'],
-                ],
-                'entity' => [
-                    '#type' => 'hidden',
-                    '#value' => $entity->id(),
-                ],
+            $row = [];
+
+            if ($isMultiple) {
+                $row['#attributes']['class'][] = 'draggable';
+            }
+
+            $row['entity'] = [
+                '#type' => 'hidden',
+                '#value' => $entity->id(),
             ];
 
             $row += $listPlugin->getCells($entity);
 
             if (!$this->getSetting('disable_remove')) {
-                $row['remove'] = [
-                    '#depth' => 2,
-                    '#name' => 'remove_' . $ind . '_' . $button['#unique_base_id'],
-                    '#src' => 'core/misc/icons/000000/ex.svg',
-                    '#type' => 'image_button',
-                ] + $button;
+                $row['remove'] = $button;
+                $row['remove']['#depth'] = 2;
+                $row['remove']['#value'] = $this->t('Remove');
+                $row['remove']['#attributes']['class'][] = 'button--small';
             }
 
             if ($this->fieldDefinition->getFieldStorageDefinition()->isMultiple()) {
