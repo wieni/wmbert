@@ -441,6 +441,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             if (!$this->getSetting('disable_remove')) {
                 $row['remove'] = $button;
                 $row['remove']['#depth'] = 2;
+                $row['remove']['#name'] = 'remove_' . $ind . '_' . $button['#unique_base_id'];
                 $row['remove']['#value'] = $this->t('Remove');
                 $row['remove']['#attributes']['class'][] = 'button--small';
             }
