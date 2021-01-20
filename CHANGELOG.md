@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.5] - 2021-01-20
 ### Changed
 - Add the entity to the entity selection handler settings. Improves the _Disable parent entity selection_ functionality.
+- When creating a new node, publish it so it can be referenced
 
 ## [1.9.4] - 2020-10-19
 ### Fixed

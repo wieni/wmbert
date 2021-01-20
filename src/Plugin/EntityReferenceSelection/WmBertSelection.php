@@ -102,6 +102,20 @@ class WmBertSelection extends DefaultSelection
         return $form;
     }
 
+    /** @see \Drupal\node\Plugin\EntityReferenceSelection\NodeSelection */
+    public function createNewEntity($entity_type_id, $bundle, $label, $uid)
+    {
+        $entity = parent::createNewEntity($entity_type_id, $bundle, $label, $uid);
+
+        if ($entity_type_id === 'node') {
+            // In order to create a referenceable node, it needs to published.
+            /** @var \Drupal\node\NodeInterface $node */
+            $entity->setPublished();
+        }
+
+        return $entity;
+    }
+
     public function getReferenceableEntities($match = null, $match_operator = 'CONTAINS', $limit = 0)
     {
         $configuration = $this->getConfiguration();
