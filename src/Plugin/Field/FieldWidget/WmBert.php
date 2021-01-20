@@ -512,6 +512,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         $selectionSettings = $this->getFieldSetting('handler_settings') + [
             'match_operator' => 'CONTAINS',
             'ignored_entities' => $ignored,
+            'entity' => $entity,
         ];
 
         if ($this->getSetting('disable_duplicate_selection')) {
