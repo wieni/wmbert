@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.9.5] - 2021-01-20
+### Added
+- Add hook documentation
+
 ### Changed
 - Add the entity to the entity selection handler settings. Improves the _Disable parent entity selection_ functionality.
 - When creating a new node, publish it so it can be referenced
