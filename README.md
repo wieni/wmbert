@@ -35,9 +35,13 @@ behaviour:
 
 #### List formatter plugin
 Changes the way the referenced entities are formatted in the table. Out
-of the box, two implementations are provided:
-[_Entity title_](src/Plugin/EntityReferenceListFormatter/Title.php) and
-[_Entity title and bundle_](src/Plugin/EntityReferenceListFormatter/TitleBundle.php).
+of the box, these implementations are provided:
+- [_Entity title_](src/Plugin/EntityReferenceListFormatter/Title.php)
+- [_Entity title (with edit link)_](src/Plugin/EntityReferenceListFormatter/TitleWithEditLink.php)
+- [_Entity title and bundle_](src/Plugin/EntityReferenceListFormatter/TitleBundle.php).
+- [_Entity title and bundle (with edit link)_](src/Plugin/EntityReferenceListFormatter/TitleBundleWithEditLink.php).
+- [_Entity title and publishing status_](src/Plugin/EntityReferenceListFormatter/TitlePublishing.php).
+
 Custom implementations can be provided through plugins with the
 `EntityReferenceListFormatter` annotation.
 

@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+### Added
+- Add _Entity title (with edit link)_ and _Entity title and bundle (with edit link)_ list formatters
+
 ### Fixed
 - Remove excessive margin when the widget is not wrapped by a fieldset
 
