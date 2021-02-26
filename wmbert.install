@@ -6,7 +6,7 @@ use Drupal\field\Entity\FieldConfig;
  * Move the label_formatter & disable_parent_entity_selection settings
  * from the form display to the field handler_settings
  */
-function wmbert_update_8001()
+function wmbert_update_8001(): void
 {
     $formDisplays = \Drupal::entityTypeManager()
         ->getStorage('entity_form_display')
@@ -51,4 +51,3 @@ function wmbert_update_8001()
         $formDisplay->save();
     }
 }
-

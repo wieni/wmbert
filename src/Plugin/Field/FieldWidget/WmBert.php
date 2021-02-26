@@ -240,7 +240,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         return $ids;
     }
 
-    public static function submit(array $form, FormStateInterface $formState)
+    public static function submit(array $form, FormStateInterface $formState): void
     {
         $formState->setRebuild(true);
 
@@ -299,10 +299,10 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         ConstraintViolationListInterface $violations,
         array $form,
         FormStateInterface $form_state
-    ) {
+    ): void {
         // Taken from Drupal\entity_browser\Plugin\Field\FieldWidget\EntityReferenceBrowserWidget
         if ($violations->count() > 0) {
-            /* @var \Symfony\Component\Validator\ConstraintViolation $violation */
+            /** @var \Symfony\Component\Validator\ConstraintViolation $violation */
             foreach ($violations as $offset => $violation) {
                 // The value of the required field is checked through the "not null"
                 // constraint, whose message is not very useful. We override it here for
@@ -384,7 +384,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
     {
         $tableId = Html::getUniqueId($htmlId . '-table');
         $listPluginDefinition = $this->listFormatterManager->getDefinition($this->getSetting('list'));
-        /* @var EntityReferenceListFormatterInterface $listPlugin */
+        /** @var EntityReferenceListFormatterInterface $listPlugin */
         $listPlugin = $this->listFormatterManager
             ->createInstance($listPluginDefinition['id'])
             ->setParentEntity($parent);
