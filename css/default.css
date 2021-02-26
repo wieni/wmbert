@@ -12,3 +12,8 @@
 .draggable-table th:first-child ~ th {
     padding-left: 1rem;
 }
+
+.field--widget-wmbert .form-type--entity-autocomplete,
+.field--widget-wmbert .form-type--select {
+    margin: 0;
+}
