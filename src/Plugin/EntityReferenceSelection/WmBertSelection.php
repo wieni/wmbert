@@ -99,6 +99,11 @@ class WmBertSelection extends DefaultSelection
             '#disabled' => !$this->referencesSameEntityType(),
         ];
 
+        $form['sort']['field']['#options'] = [
+            '_label' => $this->t('Entity label'),
+        ] + $form['sort']['field']['#options'];
+        $form['sort']['field']['#sort_start'] = 2;
+
         return $form;
     }
 
@@ -146,17 +151,54 @@ class WmBertSelection extends DefaultSelection
             $options[$bundle][$entity_id] = Html::escape($formatter->getLabel($entity));
         }
 
+        if ($configuration['sort']['field'] === '_label') {
+            foreach ($options as $bundle => &$optionsPerBundle) {
+                uasort($optionsPerBundle, 'strnatcasecmp');
+            }
+        }
+
         return $options;
     }
 
     protected function buildEntityQuery($match = null, $match_operator = 'CONTAINS')
     {
-        $query = parent::buildEntityQuery($match, $match_operator);
         $configuration = $this->getConfiguration();
-        $entityType = $this->entityTypeManager->getDefinition($configuration['target_type']);
-
+        $targetType = $configuration['target_type'];
+        $entityType = $this->entityTypeManager->getDefinition($targetType);
         $ignored = $configuration['ignored_entities'];
         $entity = $configuration['entity'];
+
+        $query = $this->entityTypeManager->getStorage($targetType)->getQuery();
+
+        // If 'target_bundles' is NULL, all bundles are referenceable, no further
+        // conditions are needed.
+        if (is_array($configuration['target_bundles'])) {
+            // If 'target_bundles' is an empty array, no bundle is referenceable,
+            // force the query to never return anything and bail out early.
+            if ($configuration['target_bundles'] === []) {
+                $query->condition($entityType->getKey('id'), NULL, '=');
+                return $query;
+            }
+            else {
+                $query->condition($entityType->getKey('bundle'), $configuration['target_bundles'], 'IN');
+            }
+        }
+
+        if (isset($match) && $label_key = $entityType->getKey('label')) {
+            $query->condition($label_key, $match, $match_operator);
+        }
+
+        // Add entity-access tag.
+        $query->addTag($targetType . '_access');
+
+        // Add the Selection handler for system_query_entity_reference_alter().
+        $query->addTag('entity_reference');
+        $query->addMetaData('entity_reference_selection_handler', $this);
+
+        // Add the sort option.
+        if (!in_array($configuration['sort']['field'], ['_none', '_label'], true)) {
+            $query->sort($configuration['sort']['field'], $configuration['sort']['direction']);
+        }
 
         if ($entity && !$entity->isNew() && $configuration['disable_parent_entity_selection']) {
             $ignored[] = $entity->id();
