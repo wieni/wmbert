@@ -14,6 +14,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Validation\Plugin\Validation\Constraint\NotNullConstraint;
+use Drupal\user\EntityOwnerInterface;
 use Drupal\wmbert\EntityReferenceListFormatterInterface;
 use Drupal\wmbert\EntityReferenceListFormatterManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -223,11 +224,13 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
     {
         $ids = [];
 
-        if (empty($values['list'])) {
-            return $ids;
+        // The entity_autocomplete form element returns an array when an entity
+        // was "autocreated", so we need to move it up a level.
+        if (isset($values['add']['entity']['entity'])) {
+            $ids[] = $values['add']['entity']['entity'];
         }
 
-        foreach ($values['list'] as $value) {
+        foreach ($values['list'] ?? [] as $value) {
             if (empty($value['entity'])) {
                 continue;
             }
@@ -237,6 +240,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             }
             $ids[] = $entity;
         }
+
         return $ids;
     }
 
@@ -519,7 +523,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             $selectionSettings['view']['arguments'][] = implode(',', array_keys($entities));
         }
 
-        return [
+        $element = [
             'entity' => [
                 '#ajax' => [
                     'event' => 'autocompleteclose',
@@ -550,6 +554,17 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
                 '#value' => $this->t('add'),
             ] + $button,
         ];
+
+        if ($bundle = $this->getAutocreateBundle()) {
+            $element['entity']['#autocreate'] = [
+                'bundle' => $bundle,
+                'uid' => ($entity instanceof EntityOwnerInterface)
+                    ? $entity->getOwnerId()
+                    : $this->currentUser->id(),
+            ];
+        }
+
+        return $element;
     }
 
     protected function getAddByRadios(EntityInterface $entity, array $button, array $entities, array $ignored): array
@@ -558,6 +573,57 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         unset($add['entity']['#options']['_none']);
         $add['entity']['#type'] = 'radios';
         return $add;
+    }
+
+    /**
+     * Returns the name of the bundle which will be used for autocreated entities.
+     *
+     * @return string
+     *   The bundle name. If autocreate is not active, NULL will be returned.
+     */
+    protected function getAutocreateBundle()
+    {
+        $bundle = null;
+        if ($this->getSelectionHandlerSetting('auto_create')) {
+            $target_bundles = $this->getSelectionHandlerSetting('target_bundles');
+            // If there's no target bundle at all, use the target_type. It's the
+            // default for bundleless entity types.
+            if (empty($target_bundles)) {
+                $bundle = $this->getFieldSetting('target_type');
+            }
+            // If there's only one target bundle, use it.
+            elseif (count($target_bundles) == 1) {
+                $bundle = reset($target_bundles);
+            }
+            // If there's more than one target bundle, use the autocreate bundle
+            // stored in selection handler settings.
+            elseif (!$bundle = $this->getSelectionHandlerSetting('auto_create_bundle')) {
+                // If no bundle has been set as auto create target means that there is
+                // an inconsistency in entity reference field settings.
+                trigger_error(sprintf(
+                    "The 'Create referenced entities if they don't already exist' option is enabled but a specific destination bundle is not set. You should re-visit and fix the settings of the '%s' (%s) field.",
+                    $this->fieldDefinition->getLabel(),
+                    $this->fieldDefinition->getName()
+                ), E_USER_WARNING);
+            }
+        }
+
+        return $bundle;
+    }
+
+    /**
+     * Returns the value of a setting for the entity reference selection handler.
+     *
+     * @param string $setting_name
+     *   The setting name.
+     *
+     * @return mixed
+     *   The setting value.
+     */
+    protected function getSelectionHandlerSetting($setting_name)
+    {
+        $settings = $this->getFieldSetting('handler_settings');
+        return $settings[$setting_name] ?? null;
     }
 
     private function getNewSelectionOptions(): array
