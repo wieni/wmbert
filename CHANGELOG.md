@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Add support for autocreating entities
+### Fixed
+- Fix `same_language_only` using interface language instead of content language
 
 ## [1.9.7] - 2021-03-04
 ### Added

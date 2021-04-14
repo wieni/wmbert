@@ -7,6 +7,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Plugin\EntityReferenceSelection\DefaultSelection;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\wmbert\EntityReferenceLabelFormatterManager;
@@ -211,7 +212,7 @@ class WmBertSelection extends DefaultSelection
         if ($configuration['same_language_only']) {
             $query->condition(
                 $entityType->getKey('langcode'),
-                $this->languageManager->getCurrentLanguage()->getId()
+                $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT)->getId()
             );
         }
 
