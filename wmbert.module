@@ -2,6 +2,8 @@
 
 use Drupal\Core\Entity\Display\EntityFormDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\Entity\BaseFieldOverride;
 use Drupal\field\Entity\FieldConfig;
 
 function wmbert_entity_presave(EntityInterface $entity): void
@@ -10,8 +12,10 @@ function wmbert_entity_presave(EntityInterface $entity): void
         return;
     }
 
-    $handler = sprintf('wmbert:%s', $entity->getTargetEntityTypeId());
-    $fieldManager = \Drupal::getContainer()->get('entity_field.manager');
+    $entityTypeId = $entity->getTargetEntityTypeId();
+    $bundle = $entity->getTargetBundle();
+    $handler = sprintf('wmbert:%s', $entityTypeId);
+    $fieldManager = Drupal::getContainer()->get('entity_field.manager');
 
     foreach ($entity->get('content') as $fieldName => $fieldDisplay) {
         if (!isset($fieldDisplay['type'], $fieldDisplay['settings'])) {
@@ -23,10 +27,7 @@ function wmbert_entity_presave(EntityInterface $entity): void
         }
 
         /** @var FieldConfig[] $fieldDefinitions */
-        $fieldDefinitions = $fieldManager->getFieldDefinitions(
-            $entity->getTargetEntityTypeId(),
-            $entity->getTargetBundle()
-        );
+        $fieldDefinitions = $fieldManager->getFieldDefinitions($entityTypeId, $bundle);
 
         if (empty($fieldDefinitions[$fieldName])) {
             continue;
@@ -36,6 +37,11 @@ function wmbert_entity_presave(EntityInterface $entity): void
 
         if ($fieldDefinition->getSetting('handler') === $handler) {
             continue;
+        }
+
+        if ($fieldDefinition instanceof BaseFieldDefinition) {
+            $fieldDefinition = BaseFieldOverride::loadByName($entityTypeId, $bundle, $fieldName)
+                ?? BaseFieldOverride::createFromBaseFieldDefinition($fieldDefinition, $bundle);
         }
 
         $fieldDefinition->setSetting('handler', $handler);
