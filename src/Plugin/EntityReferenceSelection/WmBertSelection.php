@@ -177,10 +177,9 @@ class WmBertSelection extends DefaultSelection
             // If 'target_bundles' is an empty array, no bundle is referenceable,
             // force the query to never return anything and bail out early.
             if ($configuration['target_bundles'] === []) {
-                $query->condition($entityType->getKey('id'), NULL, '=');
+                $query->condition($entityType->getKey('id'), null, '=');
                 return $query;
-            }
-            else {
+            } else {
                 $query->condition($entityType->getKey('bundle'), $configuration['target_bundles'], 'IN');
             }
         }
