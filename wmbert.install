@@ -51,3 +51,32 @@ function wmbert_update_8001(): void
         $formDisplay->save();
     }
 }
+
+/**
+ * Set the default value for the new published_only option
+ */
+function wmbert_update_8002(): void
+{
+    $storage = \Drupal::entityTypeManager()
+        ->getStorage('field_config');
+    $configNames = $storage->getQuery()
+        ->condition('field_type', 'entity_reference')
+        ->execute();
+
+    /** @var FieldConfig $config */
+    foreach ($storage->loadMultiple($configNames) as $config) {
+        if (strpos($config->getSetting('handler'), 'wmbert') !== 0) {
+            continue;
+        }
+
+        $handlerSettings = $config->getSetting('handler_settings');
+
+        if (isset($handlerSettings['published_only'])) {
+            continue;
+        }
+
+        $handlerSettings['published_only'] = 0;
+        $config->setSetting('handler_settings', $handlerSettings);
+        $config->save();
+    }
+}

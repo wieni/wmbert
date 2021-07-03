@@ -53,6 +53,7 @@ class WmBertSelection extends DefaultSelection
         return [
             'ignored_entities' => [],
             'same_language_only' => false,
+            'published_only' => false,
             'disable_parent_entity_selection' => false,
             'label_formatter' => 'title',
             'result_amount' => 0,
@@ -88,6 +89,13 @@ class WmBertSelection extends DefaultSelection
             '#default_value' => $configuration['same_language_only'],
             '#title' => $this->t('Same language only'),
             '#description' => $this->t('Only include entities with the same language as the active content language.'),
+            '#type' => 'checkbox',
+        ];
+
+        $form['published_only'] = [
+            '#default_value' => $configuration['published_only'],
+            '#title' => $this->t('Published only'),
+            '#description' => $this->t('Only include published entities (if the entity has a publishing state).'),
             '#type' => 'checkbox',
         ];
 
@@ -213,6 +221,10 @@ class WmBertSelection extends DefaultSelection
                 $entityType->getKey('langcode'),
                 $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT)->getId()
             );
+        }
+
+        if ($configuration['published_only'] && $publishedKey = $entityType->getKey('published')) {
+            $query->condition($publishedKey, true);
         }
 
         return $query;
