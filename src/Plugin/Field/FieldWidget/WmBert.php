@@ -224,13 +224,20 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
     {
         $ids = [];
 
+        if (
+            !isset($values['list'])
+            || !is_array($values['list'])
+        ) {
+            $values['list'] = [];
+        }
+
         // The entity_autocomplete form element returns an array when an entity
         // was "autocreated", so we need to move it up a level.
         if (isset($values['add']['entity']['entity'])) {
             $ids[] = $values['add']['entity']['entity'];
         }
 
-        foreach ($values['list'] ?? [] as $value) {
+        foreach ($values['list'] as $value) {
             if (empty($value['entity'])) {
                 continue;
             }
