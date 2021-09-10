@@ -8,6 +8,7 @@ use Drupal\Core\Entity\Element\EntityAutocomplete;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Field\FieldFilteredMarkup;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -489,7 +490,10 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             }
         }
 
-        $options = ['_none' => '- ' . $this->t('None') . ' -'] + $options;
+        $options = array_map(
+            static function ($label) { return FieldFilteredMarkup::create($label); },
+            ['_none' => '- ' . $this->t('None') . ' -'] + $options
+        );
 
         return [
             'entity' => [
