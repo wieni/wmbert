@@ -132,6 +132,12 @@ class WmBertSelection extends DefaultSelection
 
     public function getReferenceableEntities($match = null, $match_operator = 'CONTAINS', $limit = 0)
     {
+        $entities = $this->loadEntities($match, $match_operator, $limit);
+        return $this->createOptions($entities);
+    }
+
+    protected function loadEntities($match, $match_operator, $limit): array
+    {
         $configuration = $this->getConfiguration();
 
         if (isset($configuration['result_amount'])) {
@@ -151,8 +157,13 @@ class WmBertSelection extends DefaultSelection
             return [];
         }
 
+        return $this->entityTypeManager->getStorage($target_type)->loadMultiple($result);
+    }
+
+    protected function createOptions(array $entities): array
+    {
+        $configuration = $this->getConfiguration();
         $options = [];
-        $entities = $this->entityTypeManager->getStorage($target_type)->loadMultiple($result);
         $formatter = $this->labelFormatterManager->createInstance($configuration['label_formatter']);
 
         foreach ($entities as $entity_id => $entity) {
@@ -161,7 +172,7 @@ class WmBertSelection extends DefaultSelection
         }
 
         if ($configuration['sort']['field'] === '_label') {
-            foreach ($options as $bundle => &$optionsPerBundle) {
+            foreach ($options as &$optionsPerBundle) {
                 uasort($optionsPerBundle, 'strnatcasecmp');
             }
         }
@@ -204,7 +215,7 @@ class WmBertSelection extends DefaultSelection
         $query->addMetaData('entity_reference_selection_handler', $this);
 
         // Add the sort option.
-        if (!in_array($configuration['sort']['field'], ['_none', '_label'], true)) {
+        if (strpos($configuration['sort']['field'], '_') !== 0) {
             $query->sort($configuration['sort']['field'], $configuration['sort']['direction']);
         }
 
