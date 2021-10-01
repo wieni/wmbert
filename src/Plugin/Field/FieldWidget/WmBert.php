@@ -490,9 +490,13 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             }
         }
 
-        $options = array_map(
-            static function ($label) { return FieldFilteredMarkup::create($label); },
-            ['_none' => '- ' . $this->t('None') . ' -'] + $options
+        $options = ['_none' => '- ' . $this->t('None') . ' -'] + $options;
+
+        array_walk_recursive(
+            $options,
+            static function (&$value) {
+                $value = FieldFilteredMarkup::create($value);
+            }
         );
 
         return [
