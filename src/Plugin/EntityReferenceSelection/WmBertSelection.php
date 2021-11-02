@@ -189,6 +189,7 @@ class WmBertSelection extends DefaultSelection
         $entity = $configuration['entity'];
 
         $query = $this->entityTypeManager->getStorage($targetType)->getQuery();
+        $langcode = $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT)->getId();
 
         // If 'target_bundles' is NULL, all bundles are referenceable, no further
         // conditions are needed.
@@ -216,7 +217,11 @@ class WmBertSelection extends DefaultSelection
 
         // Add the sort option.
         if (strpos($configuration['sort']['field'], '_') !== 0) {
-            $query->sort($configuration['sort']['field'], $configuration['sort']['direction']);
+            $query->sort(
+                $configuration['sort']['field'],
+                $configuration['sort']['direction'],
+                $configuration['same_language_only'] ? $langcode : null
+            );
         }
 
         if ($entity && !$entity->isNew() && $configuration['disable_parent_entity_selection']) {
@@ -228,10 +233,7 @@ class WmBertSelection extends DefaultSelection
         }
 
         if ($configuration['same_language_only']) {
-            $query->condition(
-                $entityType->getKey('langcode'),
-                $this->languageManager->getCurrentLanguage(LanguageInterface::TYPE_CONTENT)->getId()
-            );
+            $query->condition($entityType->getKey('langcode'), $langcode);
         }
 
         if ($configuration['published_only'] && $publishedKey = $entityType->getKey('published')) {
