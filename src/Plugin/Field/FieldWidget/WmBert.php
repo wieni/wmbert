@@ -277,7 +277,11 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
             case 'auto_complete':
                 $entityId = static::getNewEntity($formState, $parents);
                 $entityId = EntityAutocomplete::extractEntityIdFromAutocompleteInput($entityId);
-                $entities[] = $entityId;
+                if ($entityId !== null) {
+                    $entities[] = $entityId;
+                    // Clear the search query from the form field
+                    NestedArray::setValue($formState->getUserInput(), array_merge($parents, ['add']), null);
+                }
                 break;
             case 'remove':
                 $index = array_pop($triggering_element['#parents']);
@@ -285,7 +289,6 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
                 break;
         }
 
-        NestedArray::setValue($formState->getUserInput(), array_merge($parents, ['add']), null);
         NestedArray::setValue($formState->getStorage(), static::getStorageKey($fieldParents, $fieldName), $entities);
     }
 
