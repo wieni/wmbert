@@ -134,6 +134,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         $settings['add_placeholder'] = 'Select an entity';
         $settings['disable_duplicate_selection'] = true;
         $settings['disable_remove'] = false;
+        $settings['disable_drag_and_drop'] = false;
         $settings['wrapper'] = true;
         return $settings;
     }
@@ -187,6 +188,12 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         $form['disable_remove'] = [
             '#default_value' => $this->getSetting('disable_remove'),
             '#title' => $this->t('Disable remove'),
+            '#type' => 'checkbox',
+        ];
+
+        $form['disable_drag_and_drop'] = [
+            '#default_value' => $this->getSetting('disable_drag_and_drop'),
+            '#title' => $this->t('Disable drag and drop'),
             '#type' => 'checkbox',
         ];
 
@@ -403,7 +410,8 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
         $listPlugin = $this->listFormatterManager
             ->createInstance($listPluginDefinition['id'])
             ->setParentEntity($parent);
-        $isMultiple = $this->fieldDefinition->getFieldStorageDefinition()->isMultiple();
+        $isMultiple = ($this->fieldDefinition->getFieldStorageDefinition()->isMultiple() 
+            && !$this->getSetting('disable_drag_and_drop'));
 
         $list = [
             '#attributes' => [
@@ -461,7 +469,7 @@ class WmBert extends WidgetBase implements ContainerFactoryPluginInterface
                 $row['remove']['#attributes']['class'][] = 'button--small';
             }
 
-            if ($this->fieldDefinition->getFieldStorageDefinition()->isMultiple()) {
+            if ($isMultiple) {
                 $weight = $ind;
                 $row['#weight'] = $weight;
                 $row['weight'] = [
