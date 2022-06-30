@@ -61,6 +61,7 @@ function wmbert_update_8002(): void
         ->getStorage('field_config');
     $configNames = $storage->getQuery()
         ->condition('field_type', 'entity_reference')
+        ->accessCheck(false)
         ->execute();
 
     /** @var FieldConfig $config */
