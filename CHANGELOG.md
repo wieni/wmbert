@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.9] - 2023-12-18
+- Add Drupal 10 compatibility
+- Please migrate to https://www.drupal.org/project/bert
+
 ## [1.11.8] - 2023
 - Add update script
 

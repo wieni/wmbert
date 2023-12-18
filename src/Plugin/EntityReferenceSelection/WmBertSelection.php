@@ -240,6 +240,8 @@ class WmBertSelection extends DefaultSelection
             $query->condition($publishedKey, true);
         }
 
+        $query->accessCheck();
+
         return $query;
     }
 
